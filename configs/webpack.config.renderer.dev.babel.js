@@ -75,6 +75,13 @@ export default merge(baseConfig, {
               sourceMap: true,
             },
           },
+          {
+            loader: 'postcss-loader',
+            options: {
+              ident: 'postcss',
+              plugins: [require('tailwindcss'), require('autoprefixer')],
+            },
+          },
         ],
       },
       {

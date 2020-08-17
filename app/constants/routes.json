@@ -1,4 +1,5 @@
 {
   "HOME": "/",
+  "INVOICE": "/invoice",
   "COUNTER": "/counter"
 }
