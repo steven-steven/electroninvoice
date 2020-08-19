@@ -11,12 +11,16 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import MenuBuilder from './menu';
+import ejse from 'ejs-electron';
+import fs from 'fs';
 
-import InvoiceRenderer from './renderer';
+import MenuBuilder from './menu';
+import { Invoice } from './features/invoice/invoiceSlice';
+
+// import InvoiceRenderer from './renderer';
 
 export default class AppUpdater {
   constructor() {
@@ -27,6 +31,7 @@ export default class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
+let pdfWindow: BrowserWindow | null = null;
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -127,7 +132,90 @@ app.on('activate', () => {
   if (mainWindow === null) createWindow();
 });
 
-ipcMain.on('save-invoice', (event, invoice) => {
-  if (mainWindow == null) return;
-  InvoiceRenderer.save(mainWindow, invoice);
+function pdfSettings() {
+  const option = {
+    landscape: false,
+    marginsType: 1,
+    pageSize: 'A4',
+  };
+  return option;
+}
+
+function savePdf(win: BrowserWindow, pdfData: Buffer, invoiceId: number) {
+  const options = {
+    title: 'Save file',
+    defaultPath: `${app.getPath('downloads')}/invoice_${invoiceId}`,
+    buttonLabel: 'Save',
+
+    filters: [
+      { name: 'pdf', extensions: ['pdf'] },
+      { name: 'All Files', extensions: ['*'] },
+    ],
+  };
+
+  return dialog.showSaveDialog(win, options).then((result) => {
+    const savePath = result.filePath;
+    if (savePath === undefined) {
+      throw new Error('undefined filename');
+    }
+
+    fs.writeFile(savePath, pdfData, (error) => {
+      if (error) throw error;
+      console.log('Write PDF successfully.');
+      log.info('Write PDF success');
+    });
+
+    return savePath;
+  });
+}
+
+ipcMain.on('save-invoice', (_event, invoice: Invoice) => {
+  if (invoice.client_address) {
+    const addressLine1 = invoice.client_address.address;
+    const addressLine2 = [
+      invoice.client_address.city,
+      invoice.client_address.state,
+      invoice.client_address.country,
+    ]
+      .filter(Boolean)
+      .join(', ');
+
+    ejse.data('addressLine1', addressLine1);
+    ejse.data('addressLine2', addressLine2);
+  }
+
+  ejse.data('client', invoice.client);
+  ejse.data('items', invoice.items);
+  ejse.data('date', invoice.date);
+  ejse.data('tax', invoice.tax);
+  ejse.data('total', invoice.total);
+  ejse.data('subtotal', invoice.total - invoice.tax);
+  ejse.data('id', invoice.id);
+
+  ejse.data('iconPath', `file://${__dirname}/icon.png`);
+
+  pdfWindow = new BrowserWindow({
+    show: true,
+  });
+  pdfWindow.loadURL(`file://${__dirname}/invoiceTemplate.ejs`);
+  log.info('LOAD');
+  log.info(`file://${__dirname}/invoiceTemplate.ejs`);
+
+  pdfWindow.webContents.on('did-finish-load', () => {
+    if (pdfWindow) {
+      pdfWindow.webContents
+        .printToPDF(pdfSettings())
+        .then((data) => {
+          const savedPath = savePdf(pdfWindow, data, invoice.id);
+          return savedPath;
+        })
+        .catch((error) => {
+          console.log(error);
+          log.info(error);
+        });
+    }
+  });
+
+  // if (mainWindow == null) return;
+  // InvoiceRenderer.save(mainWindow, invoice);
 });

@@ -17,32 +17,28 @@ export default function Invoice() {
   const dispatch = useDispatch();
   // const invoices = useSelector(getInvoice);
   // const selectedId = useSelector(getSelectedId);
+
   const invoice = {
-    shipping: {
-      name: 'John Doe',
-      address: '1234 Main Street',
-      city: 'San Francisco',
-      state: 'CA',
-      country: 'US',
-      postal_code: 94111,
+    client: 'PT A',
+    client_address: {
+      address: '690 King St',
+      city: 'Cilegon',
+      state: 'Banten',
+      country: 'Indonesia',
+      postal_code: 154321,
     },
+    date: '24/03/2019',
     items: [
       {
-        item: 'TC 100',
-        description: 'Toner Cartridge',
-        quantity: 2,
-        amount: 6000,
-      },
-      {
-        item: 'USB_EXT',
-        description: 'USB Cable Extender',
-        quantity: 1,
-        amount: 2000,
+        name: 'Paku',
+        rate: 10000,
+        quantity: 3,
+        amount: 30000,
       },
     ],
-    subtotal: 8000,
-    paid: 0,
-    invoice_nr: 1234,
+    tax: 5000,
+    total: 8000,
+    id: 1,
   };
 
   const handleClick = () => {
@@ -53,10 +49,8 @@ export default function Invoice() {
     <div>
       <div className="bg-gray-500 p-5 text-center">Tailwind</div>
       <form>
-        <label>
-          Name:
-          <input type="text" name="name" />
-        </label>
+        Name:
+        <input type="text" name="name" />
       </form>
       <button type="submit" onClick={() => handleClick()}>
         test

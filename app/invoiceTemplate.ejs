@@ -1,0 +1,275 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>A simple, clean, and responsive HTML invoice template</title>
+
+    <style>
+    body {
+      padding: 0;
+      margin: 0;
+    }
+    .invoice-box {
+        margin: auto;
+        padding: 50px;
+        background-color: white;
+        font-size: 14px;
+        line-height: 24px;
+        font-family: Arial, 'Helvetica Neue', 'Helvetica', Helvetica, sans-serif;
+        color: #555;
+    }
+
+    .invoice-box table {
+        width: 100%;
+        line-height: inherit;
+        text-align: left;
+    }
+
+    .invoice-box table td {
+        padding: 5px;
+        vertical-align: top;
+    }
+
+    .invoice-box table tr td:nth-child(n+3) {
+        text-align: right;
+    }
+
+    .invoice-box table tr.top table tr {
+        display: flex;
+    }
+
+    .invoice-box table tr.top table td {
+        padding-bottom: 30px;
+    }
+
+    .invoice-box table tr.top table td.description {
+        text-align: right;
+        color: #444444;
+        font-size: 15px;
+        flex: auto;
+    }
+
+    .invoice-box table tr.top table td.title {
+        font-size: 23px;
+        line-height: 45px;
+        color: #333;
+        text-align: left;
+    }
+
+    .invoice-box table tr.top table td.logo {
+        font-size: 45px;
+        line-height: 45px;
+        color: #333;
+        text-align: left;
+    }
+
+    .invoice-box table tr.information h1 {
+      font-size: 30px;
+      color: #444444;
+      font-weight: lighter;
+    }
+
+    .invoice-box table tr.information td {
+      text-align: left;
+    }
+
+    .invoice-box table tr.information div.spacer {
+      padding-bottom: 80px;
+    }
+
+
+    .invoice-box table tr.heading td {
+        background: #eee;
+        border-bottom: 1px solid #ddd;
+        font-weight: bold;
+    }
+
+    .invoice-box table tr.details td {
+        padding-bottom: 20px;
+    }
+
+    .invoice-box table tr.item td{
+        border-bottom: 1px solid #eee;
+    }
+
+    .invoice-box table tr.item.last td {
+        border-bottom: none;
+    }
+
+    .invoice-box table tr.total td:nth-child(n+3) {
+        border-top: 2px solid #eee;
+        font-weight: bold;
+    }
+
+    @media only screen and (max-width: 600px) {
+        .invoice-box table tr.top table td {
+            width: 100%;
+            display: block;
+            text-align: center;
+        }
+
+        .invoice-box table tr.information table td {
+            width: 100%;
+            display: block;
+            text-align: center;
+        }
+    }
+
+    /** RTL **/
+    .rtl {
+        direction: rtl;
+        font-family: Tahoma, 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+    }
+
+    .rtl table {
+        text-align: right;
+    }
+
+    .rtl table tr td:nth-child(2) {
+        text-align: left;
+    }
+    </style>
+</head>
+
+<body>
+    <div class="invoice-box">
+        <table cellpadding="0" cellspacing="0">
+            <tr class="top">
+                <td colspan="2">
+                    <table>
+                        <tr>
+                            <td class="logo">
+                                <img src="<%= iconPath %>" style="width:100%; max-width:80px;">
+                            </td>
+                            <td class="title">
+                              <span>Pt. Dwiprima Karyaguna</span>
+                            </td>
+                            <td class="description">
+                                Pt. Dwiprima Karyaguna<br>
+                                Jln. Raya Anyer Km.122<br>
+                                Cilegon, Banten, Indonesia
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <tr class="information">
+                <td colspan="2">
+                    <h1>Invoice</h1>
+                    <hr/>
+                    <table>
+                        <tr>
+                            <td style="width:20%">
+                                Invoice Number: <br>
+                                Tanggal Invoice: <br>
+                                Balance Due:
+                            </td>
+
+                            <td style="width:30%">
+                              <b><%= id %></b><br>
+                              <%= date %> <br>
+                              <%= total %>
+                            </td>
+
+                            <td style="width:50%">
+                              <b><%= client %></b><br>
+                              <%if (addressLine1) { %>
+                                <%= addressLine1 %> <br>
+                              <% } %>
+                              <%if (addressLine2) { %>
+                                <%= addressLine2 %> <br>
+                              <% } %>
+                            </td>
+                        </tr>
+                    </table>
+                    <hr/>
+                    <div class="spacer"></div>
+                </td>
+            </tr>
+        </table>
+
+        <table cellpadding="0" cellspacing="0">
+            <tr class="heading">
+                <td>
+                    No.
+                </td>
+
+                <td>
+                    Nama Barang/Jasa
+                </td>
+
+                <td>
+                    Harga Satuan
+                </td>
+
+                <td>
+                  Kuantum
+                </td>
+
+                <td>
+                  Jumlah
+                </td>
+            </tr>
+
+            <% for(var i=0; i < items.length; i++) { %>
+              <tr class="item">
+                  <td>
+                      <%= i+1 %>
+                  </td>
+
+                  <td>
+                      <%= items[i].name %>
+                  </td>
+
+                  <td>
+                      Rp <%= items[i].rate %>
+                  </td>
+
+                  <td>
+                      <%= items[i].quantity %>
+                  </td>
+
+                  <td>
+                      Rp. <%= items[i].amount %>
+                  </td>
+              </tr>
+            <% } %>
+
+            <tr class="item last">
+                <td></td>
+                <td></td>
+                <td>
+                    Subtotal
+                </td>
+                <td></td>
+                <td>
+                    Rp. <%= subtotal %>
+                </td>
+            </tr>
+
+            <tr class="item last">
+                <td></td>
+                <td></td>
+                <td>
+                    Tax
+                </td>
+                <td></td>
+                <td>
+                    Rp. <%= tax %>
+                </td>
+            </tr>
+
+            <tr class="total">
+                <td></td>
+                <td></td>
+                <td> Total: </td>
+                <td></td>
+                <td>
+                    Rp. <%= total %>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

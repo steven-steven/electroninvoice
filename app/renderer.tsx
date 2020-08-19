@@ -1,8 +1,9 @@
 import { BrowserWindow, app } from 'electron';
+import { Invoice } from './features/invoice/invoiceSlice';
 
 const { dialog } = require('electron');
 const fs = require('fs');
-const PDFDocument = require('pdfkit');
+const PDFDocument = require('./pdfkit.standalone');
 
 type DocType = typeof PDFDocument;
 
@@ -12,7 +13,7 @@ function generateTableRow(
   item: string,
   description: string,
   unitCost: string | number,
-  quantity: string,
+  quantity: string | number,
   lineTotal: string
 ) {
   doc
@@ -29,15 +30,9 @@ function generateHr(doc: DocType, y: number) {
 }
 
 function formatCurrency(cents: number) {
-  return `$${(cents / 100).toFixed(2)}`;
-}
-
-function formatDate(date: Date) {
-  const day = date.getDate();
-  const month = date.getMonth() + 1;
-  const year = date.getFullYear();
-
-  return `${year}/${month}/${day}`;
+  // return `$${(cents / 100).toFixed(2)}`;
+  const priceFormatted = new Intl.NumberFormat('ID').format(cents);
+  return `IDR ${priceFormatted}`;
 }
 
 function generateHeader(doc: DocType) {
@@ -45,15 +40,15 @@ function generateHeader(doc: DocType) {
     .image('./resources/icon.png', 50, 45, { width: 50 })
     .fillColor('#444444')
     .fontSize(20)
-    .text('ACME Inc.', 110, 57)
+    .text('Pt. Dwiprima Karyaguna', 110, 57)
     .fontSize(10)
-    .text('ACME Inc.', 200, 50, { align: 'right' })
-    .text('123 Main Street', 200, 65, { align: 'right' })
-    .text('New York, NY, 10025', 200, 80, { align: 'right' })
+    .text('Pt. Dwiprima Karyaguna', 200, 50, { align: 'right' })
+    .text('Jln. Raya Anyer Km. 122', 200, 65, { align: 'right' })
+    .text('​Cilegon, Banten, Indonesia', 200, 80, { align: 'right' })
     .moveDown();
 }
 
-function generateCustomerInformation(doc: DocType, invoice) {
+function generateCustomerInformation(doc: DocType, invoice: Invoice) {
   doc.fillColor('#444444').fontSize(20).text('Invoice', 50, 160);
 
   generateHr(doc, 185);
@@ -64,32 +59,41 @@ function generateCustomerInformation(doc: DocType, invoice) {
     .fontSize(10)
     .text('Invoice Number:', 50, customerInformationTop)
     .font('Helvetica-Bold')
-    .text(invoice.invoice_nr, 150, customerInformationTop)
+    .text(invoice.id, 150, customerInformationTop)
     .font('Helvetica')
     .text('Invoice Date:', 50, customerInformationTop + 15)
-    .text(formatDate(new Date()), 150, customerInformationTop + 15)
+    .text(invoice.date, 150, customerInformationTop + 15)
     .text('Balance Due:', 50, customerInformationTop + 30)
-    .text(
-      formatCurrency(invoice.subtotal - invoice.paid),
-      150,
-      customerInformationTop + 30
-    )
+    .text(formatCurrency(invoice.total), 150, customerInformationTop + 30)
 
     .font('Helvetica-Bold')
-    .text(invoice.shipping.name, 300, customerInformationTop)
-    .font('Helvetica')
-    .text(invoice.shipping.address, 300, customerInformationTop + 15)
-    .text(
-      `${invoice.shipping.city}, ${invoice.shipping.state}, ${invoice.shipping.country}`,
-      300,
-      customerInformationTop + 30
-    )
-    .moveDown();
+    .text(invoice.client, 300, customerInformationTop);
 
+  if (invoice.client_address) {
+    const addressLine1 = invoice.client_address.address;
+    const addressLine2 = [
+      invoice.client_address.city,
+      invoice.client_address.state,
+      invoice.client_address.country,
+    ]
+      .filter(Boolean)
+      .join(', ');
+
+    if (addressLine1) {
+      doc
+        .font('Helvetica')
+        .text(addressLine1, 300, customerInformationTop + 15);
+    }
+    if (addressLine2) {
+      doc.text(addressLine2, 300, customerInformationTop + 30);
+    }
+  }
+
+  doc.moveDown();
   generateHr(doc, 252);
 }
 
-function generateInvoiceTable(doc: DocType, invoice) {
+function generateInvoiceTable(doc: DocType, invoice: Invoice) {
   let i;
   const invoiceTableTop = 330;
 
@@ -97,11 +101,11 @@ function generateInvoiceTable(doc: DocType, invoice) {
   generateTableRow(
     doc,
     invoiceTableTop,
-    'Item',
-    'Description',
-    'Unit Cost',
-    'Quantity',
-    'Line Total'
+    'No.',
+    'Nama Barang/Jasa',
+    'Harga Satuan',
+    'Kuantum',
+    'Jumlah'
   );
   generateHr(doc, invoiceTableTop + 20);
   doc.font('Helvetica');
@@ -112,9 +116,9 @@ function generateInvoiceTable(doc: DocType, invoice) {
     generateTableRow(
       doc,
       position,
-      item.item,
-      item.description,
-      formatCurrency(item.amount / item.quantity),
+      (i + 1).toString(),
+      item.name,
+      formatCurrency(item.rate),
       item.quantity,
       formatCurrency(item.amount)
     );
@@ -130,7 +134,7 @@ function generateInvoiceTable(doc: DocType, invoice) {
     '',
     'Subtotal',
     '',
-    formatCurrency(invoice.subtotal)
+    formatCurrency(invoice.total - invoice.tax)
   );
 
   const paidToDatePosition = subtotalPosition + 20;
@@ -139,9 +143,9 @@ function generateInvoiceTable(doc: DocType, invoice) {
     paidToDatePosition,
     '',
     '',
-    'Paid To Date',
+    'Tax',
     '',
-    formatCurrency(invoice.paid)
+    formatCurrency(invoice.tax)
   );
 
   const duePosition = paidToDatePosition + 25;
@@ -151,22 +155,18 @@ function generateInvoiceTable(doc: DocType, invoice) {
     duePosition,
     '',
     '',
-    'Balance Due',
+    'Grand Total',
     '',
-    formatCurrency(invoice.subtotal - invoice.paid)
+    formatCurrency(invoice.total)
   );
   doc.font('Helvetica');
 }
 
 function generateFooter(doc: DocType) {
-  doc
-    .fontSize(10)
-    .text(
-      'Payment is due within 15 days. Thank you for your business.',
-      50,
-      780,
-      { align: 'center', width: 500 }
-    );
+  doc.fontSize(10).text('Thank you for your business.', 50, 780, {
+    align: 'center',
+    width: 500,
+  });
 }
 
 function createInvoice(invoice: DocType, path: string) {
@@ -182,14 +182,14 @@ function createInvoice(invoice: DocType, path: string) {
 }
 
 export default {
-  save(win: BrowserWindow, invoice) {
+  save(win: BrowserWindow, invoice: Invoice) {
     const options = {
       title: 'Save file',
       defaultPath: `${app.getPath('downloads')}/invoice_${invoice.id}`,
       buttonLabel: 'Save',
 
       filters: [
-        { name: 'txt', extensions: ['txt'] },
+        { name: 'pdf', extensions: ['pdf'] },
         { name: 'All Files', extensions: ['*'] },
       ],
     };

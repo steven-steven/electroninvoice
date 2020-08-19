@@ -6,14 +6,22 @@ import { AppThunk, RootState, AppDispatch } from '../../store';
 
 export interface InvoiceRequest {
   client: string;
+  client_address?: {
+    address?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postal_code?: string;
+  };
   date: string;
   items: Item[];
-  tax?: number;
+  tax: number;
 }
 
 export interface Invoice extends InvoiceRequest {
   id: number;
   createdAt: string;
+  total: number;
 }
 
 export interface Item {
