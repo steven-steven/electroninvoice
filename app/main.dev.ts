@@ -155,8 +155,10 @@ function savePdf(win: BrowserWindow, pdfData: Buffer, invoiceId: number) {
 
   return dialog.showSaveDialog(win, options).then((result) => {
     const savePath = result.filePath;
-    if (savePath === undefined) {
-      throw new Error('undefined filename');
+
+    // clicked cancel
+    if (!savePath) {
+      return null;
     }
 
     fs.writeFile(savePath, pdfData, (error) => {
@@ -170,6 +172,7 @@ function savePdf(win: BrowserWindow, pdfData: Buffer, invoiceId: number) {
 }
 
 ipcMain.on('save-invoice', (_event, invoice: Invoice) => {
+  console.log(invoice);
   if (invoice.client_address) {
     const addressLine1 = invoice.client_address.address;
     const addressLine2 = [
@@ -195,7 +198,7 @@ ipcMain.on('save-invoice', (_event, invoice: Invoice) => {
   ejse.data('iconPath', `file://${__dirname}/icon.png`);
 
   pdfWindow = new BrowserWindow({
-    show: true,
+    show: false,
   });
   pdfWindow.loadURL(`file://${__dirname}/invoiceTemplate.ejs`);
   log.info('LOAD');
@@ -206,8 +209,8 @@ ipcMain.on('save-invoice', (_event, invoice: Invoice) => {
       pdfWindow.webContents
         .printToPDF(pdfSettings())
         .then((data) => {
-          const savedPath = savePdf(pdfWindow, data, invoice.id);
-          return savedPath;
+          if (mainWindow) return savePdf(mainWindow, data, invoice.id);
+          return '';
         })
         .catch((error) => {
           console.log(error);

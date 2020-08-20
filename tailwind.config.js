@@ -19,6 +19,7 @@ module.exports = {
     extend: {
       colors: {
         cyan: '#9cdbff',
+        sidebarText: '#6C6C6C'
       },
       margin: {
         '96': '24rem',

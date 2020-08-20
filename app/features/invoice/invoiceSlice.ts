@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import axios from 'axios';
+import { ipcRenderer } from 'electron';
 // eslint-disable-next-line import/no-cycle
 import { AppThunk, RootState, AppDispatch } from '../../store';
 
@@ -35,11 +36,18 @@ export interface Invoices {
   [k: string]: Invoice;
 }
 
+export const status = {
+  IDLE: 'idle',
+  LOADING: 'loading',
+};
+
 const invoiceSlice = createSlice({
   name: 'invoice',
   initialState: {
     selectedInvoice: null as number | null,
     invoices: {} as Invoices,
+    status: status.IDLE,
+    isFetched: false,
   },
   reducers: {
     addInvoice: (state, invoice: PayloadAction<Invoice>) => {
@@ -49,17 +57,21 @@ const invoiceSlice = createSlice({
           ...state.invoices,
           [invoice.payload.id]: invoice.payload,
         },
+        status: status.IDLE,
       };
     },
     loadAllInvoice: (state, invoices: PayloadAction<Invoices>) => {
       return {
         ...state,
         invoices: invoices.payload,
+        status: status.IDLE,
+        isFetched: true,
       };
     },
     deleteInvoice: (state, id: PayloadAction<number>) => {
       const clone = { ...state };
       delete clone.invoices[id.payload];
+      clone.status = status.IDLE;
       return clone;
     },
     updateInvoice: (state, invoice: PayloadAction<Invoice>) => {
@@ -69,12 +81,19 @@ const invoiceSlice = createSlice({
           ...state.invoices,
           [invoice.payload.id]: invoice.payload,
         },
+        status: status.IDLE,
       };
     },
     selectInvoice: (state, id: PayloadAction<number>) => {
       return {
         ...state,
         selectedInvoice: id.payload,
+      };
+    },
+    setLoading: (state) => {
+      return {
+        ...state,
+        status: status.LOADING,
       };
     },
   },
@@ -86,10 +105,12 @@ export const {
   deleteInvoice,
   updateInvoice,
   selectInvoice,
+  setLoading,
 } = invoiceSlice.actions;
 
 export const initializeInvoices = (): AppThunk => {
   return (dispatch: AppDispatch) => {
+    dispatch(setLoading());
     return axios
       .get('https://go-invoice-api.herokuapp.com/allInvoice')
       .then(({ data }) => dispatch(loadAllInvoice(data.Invoices)));
@@ -98,6 +119,7 @@ export const initializeInvoices = (): AppThunk => {
 
 export const addInvoiceCall = (newInvoice: InvoiceRequest): AppThunk => {
   return (dispatch: AppDispatch) => {
+    dispatch(setLoading());
     return axios
       .post('https://go-invoice-api.herokuapp.com/invoice', newInvoice)
       .then(({ data }) => dispatch(addInvoice(data.Invoice)));
@@ -106,6 +128,7 @@ export const addInvoiceCall = (newInvoice: InvoiceRequest): AppThunk => {
 
 export const deleteInvoiceCall = (id: number): AppThunk => {
   return (dispatch: AppDispatch) => {
+    dispatch(setLoading());
     return axios
       .delete(`https://go-invoice-api.herokuapp.com/invoice/${id}`)
       .then(({ data }) => {
@@ -122,6 +145,7 @@ export const updateInvoiceCall = (
   newInvoice: InvoiceRequest
 ): AppThunk => {
   return (dispatch: AppDispatch) => {
+    dispatch(setLoading());
     return axios
       .put('https://go-invoice-api.herokuapp.com/invoice', {
         ID: id,
@@ -131,8 +155,23 @@ export const updateInvoiceCall = (
   };
 };
 
+export const saveInvoice = (id: number): AppThunk => {
+  return (dispatch: AppDispatch, getState: () => RootState) => {
+    const invoiceState = getState().invoice;
+    if (invoiceState.invoices) {
+      return ipcRenderer.send(
+        'save-invoice',
+        invoiceState.invoices[id.toString()]
+      );
+    }
+    return false;
+  };
+};
+
 export default invoiceSlice.reducer;
 
 export const getInvoice = (state: RootState) => state.invoice.invoices;
+export const getStatus = (state: RootState) => state.invoice.status;
+export const getIsFetched = (state: RootState) => state.invoice.isFetched;
 export const getSelectedId = (state: RootState) =>
   state.invoice.selectedInvoice;

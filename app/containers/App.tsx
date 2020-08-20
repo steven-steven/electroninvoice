@@ -11,7 +11,7 @@ export default function App(props: Props) {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <div className="bg-black flex-1 ml-56">{children}</div>
+      <div className="flex-1 ml-56">{children}</div>
     </div>
   );
 }
