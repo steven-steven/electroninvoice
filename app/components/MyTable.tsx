@@ -19,14 +19,14 @@ export default function MyTable({
   });
 
   return (
-    <table {...getTableProps()} className="border-2 border-blue-500">
+    <table {...getTableProps()} className="table-fixed w-full">
       <thead>
         {headerGroups.map((headerGroup) => (
           <tr {...headerGroup.getHeaderGroupProps()}>
             {headerGroup.headers.map((column) => (
               <th
                 {...column.getHeaderProps()}
-                className="border-b-2 border-red-500 bg-blue-200 font-bold"
+                className="pb-2 font-display font-light"
               >
                 {column.render('Header')}
               </th>
@@ -43,7 +43,7 @@ export default function MyTable({
                 return (
                   <td
                     {...cell.getCellProps()}
-                    className="border-b-2 bg-orange-200 p-6"
+                    className="border-t leading-normal p-3"
                   >
                     {cell.render('Cell')}
                   </td>

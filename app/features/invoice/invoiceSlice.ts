@@ -141,16 +141,13 @@ export const deleteInvoiceCall = (id: number): AppThunk => {
 };
 
 export const updateInvoiceCall = (
-  id: string,
+  id: number,
   newInvoice: InvoiceRequest
 ): AppThunk => {
   return (dispatch: AppDispatch) => {
     dispatch(setLoading());
     return axios
-      .put('https://go-invoice-api.herokuapp.com/invoice', {
-        ID: id,
-        Invoice: newInvoice,
-      })
+      .put(`https://go-invoice-api.herokuapp.com/invoice/${id}`, newInvoice)
       .then(({ data }) => dispatch(updateInvoice(data.Invoice)));
   };
 };

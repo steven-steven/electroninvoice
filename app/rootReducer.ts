@@ -5,7 +5,8 @@ import { History } from 'history';
 import counterReducer from './features/counter/counterSlice';
 // eslint-disable-next-line import/no-cycle
 import invoiceReducer from './features/invoice/invoiceSlice';
-import daftarBarangReducer from './features/invoice/invoiceSlice';
+// eslint-disable-next-line import/no-cycle
+import daftarBarangReducer from './features/daftarBarang/daftarBarangSlice';
 
 export default function createRootReducer(history: History) {
   return combineReducers({

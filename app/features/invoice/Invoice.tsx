@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { CellProps } from 'react-table';
+import { Link } from 'react-router-dom';
+import routes from '../../constants/routes.json';
 import MyTable from '../../components/MyTable';
 import {
   initializeInvoices,
@@ -45,42 +47,65 @@ export default function InvoicePage() {
   const columns = React.useMemo(
     () => [
       {
-        Header: 'Daftar Invoice',
-        columns: [
-          {
-            Header: 'No. Invoice',
-            accessor: 'idCol',
-          },
-          {
-            Header: 'Nama Customer',
-            accessor: 'clientCol',
-          },
-          {
-            Header: 'Tanggal Invoice',
-            accessor: 'dateCol',
-          },
-          {
-            Header: 'Total',
-            accessor: 'totalCol',
-          },
-          {
-            // Make an expander cell
-            Header: 'Download',
-            id: 'download',
-            // eslint-disable-next-line react/display-name
-            Cell: ({ row }: CellProps<Invoice>) => {
-              return (
-                <button
-                  type="button"
-                  onClick={() => dispatch(saveInvoice(row.values.idCol))}
-                >
-                  <i className="far fa-file-pdf fa-sm" />
-                  Download
-                </button>
-              );
-            },
-          },
-        ],
+        Header: 'No. Invoice',
+        accessor: 'idCol',
+      },
+      {
+        Header: 'Nama Customer',
+        accessor: 'clientCol',
+      },
+      {
+        Header: 'Tanggal Invoice',
+        accessor: 'dateCol',
+      },
+      {
+        Header: 'Total',
+        accessor: 'totalCol',
+      },
+      {
+        // Make an expander cell
+        Header: 'Download',
+        id: 'download',
+        // eslint-disable-next-line react/display-name
+        Cell: ({ row }: CellProps<Invoice>) => {
+          return (
+            <button
+              type="button"
+              onClick={() => dispatch(saveInvoice(row.values.idCol))}
+            >
+              <i className="far fa-file-pdf fa-md" />
+            </button>
+          );
+        },
+      },
+      {
+        Header: 'Edit',
+        id: 'edit',
+        // eslint-disable-next-line react/display-name
+        Cell: ({ row }: CellProps<Invoice>) => {
+          return (
+            <Link
+              to={{
+                pathname: routes.ADDINVOICE,
+                search: `?id=${row.values.idCol}`,
+              }}
+            >
+              <i className="far fa-edit fa-md" />
+            </Link>
+          );
+        },
+      },
+      {
+        Header: 'Delete',
+        id: 'delete',
+        // eslint-disable-next-line react/display-name
+        Cell: ({ row }: CellProps<Invoice>) => {
+          return (
+            <button type="button" onClick={() => {}}>
+              <i className="far fa-trash-alt fa-md" />
+            </button>
+          );
+        },
       },
     ],
     []
@@ -111,7 +136,7 @@ export default function InvoicePage() {
 
   return (
     <div>
-      <div className="search-container relative m-2">
+      <div className="search-container relative m-1">
         <input
           type="text"
           placeholder="Search"
@@ -121,13 +146,20 @@ export default function InvoicePage() {
           <i className="fas fa-search fa-sm" />
         </div>
       </div>
-      {status === invoiceStatus.LOADING ? (
-        <div className="text-center">
-          <i className="fa fa-spinner fa-pulse fa-3x fa-fw" />
-        </div>
-      ) : (
-        <MyTable columns={columns} data={data} />
-      )}
+      <div className="mt-8 flex items-center justify-center">
+        {status === invoiceStatus.LOADING ? (
+          <div className="text-center">
+            <i className="fa fa-spinner fa-pulse fa-3x fa-fw" />
+          </div>
+        ) : (
+          <div className="tableBox w-11/12 flex flex-col text-center text-gray-700 bg-white shadow-md rounded-lg p-3">
+            <span className="text-left text-2xl ml-5 mb-3 font-display font-light">
+              Daftar Invoice
+            </span>
+            <MyTable columns={columns} data={data} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -9,6 +9,7 @@ module.exports = {
     fontFamily: {
       display: ['Gilroy', 'sans-serif'],
       body: ['Graphik', 'sans-serif'],
+      serif: ['Georgia', 'Cambria', 'Times New Roman', 'Times', 'serif'],
     },
     borderWidth: {
       default: '1px',
@@ -19,7 +20,7 @@ module.exports = {
     extend: {
       colors: {
         cyan: '#9cdbff',
-        sidebarText: '#6C6C6C'
+        sidebarText: '#6C6C6C',
       },
       margin: {
         '96': '24rem',
