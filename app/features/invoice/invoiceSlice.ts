@@ -69,10 +69,12 @@ const invoiceSlice = createSlice({
       };
     },
     deleteInvoice: (state, id: PayloadAction<number>) => {
-      const clone = { ...state };
-      delete clone.invoices[id.payload];
-      clone.status = status.IDLE;
-      return clone;
+      const { [id.payload]: value, ...docsToKeep } = state.invoices;
+      return {
+        ...state,
+        invoices: docsToKeep,
+        status: status.IDLE,
+      };
     },
     updateInvoice: (state, invoice: PayloadAction<Invoice>) => {
       return {
@@ -127,16 +129,21 @@ export const addInvoiceCall = (newInvoice: InvoiceRequest): AppThunk => {
 };
 
 export const deleteInvoiceCall = (id: number): AppThunk => {
-  return (dispatch: AppDispatch) => {
+  return async (dispatch: AppDispatch) => {
+    const isToDelete = await ipcRenderer.invoke(
+      'confirmDeleteInvoice',
+      id.toString()
+    );
+    if (!isToDelete) {
+      return;
+    }
     dispatch(setLoading());
-    return axios
-      .delete(`https://go-invoice-api.herokuapp.com/invoice/${id}`)
-      .then(({ data }) => {
-        if (data.Success) {
-          dispatch(deleteInvoice(id));
-        }
-        return data;
-      });
+    const { data } = await axios.delete(
+      `https://go-invoice-api.herokuapp.com/invoice/${id}`
+    );
+    if (data.Success) {
+      dispatch(deleteInvoice(id));
+    }
   };
 };
 

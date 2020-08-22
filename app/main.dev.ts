@@ -16,7 +16,6 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import ejse from 'ejs-electron';
 import fs from 'fs';
-
 import MenuBuilder from './menu';
 import { Invoice } from './features/invoice/invoiceSlice';
 
@@ -222,3 +221,39 @@ ipcMain.on('save-invoice', (_event, invoice: Invoice) => {
   // if (mainWindow == null) return;
   // InvoiceRenderer.save(mainWindow, invoice);
 });
+
+ipcMain.handle(
+  'confirmDeleteInvoice',
+  async (_event, id: string): Promise<boolean> => {
+    console.log(id);
+    const options = {
+      type: 'question',
+      buttons: ['Cancel', 'Hapus'],
+      defaultId: 2,
+      title: 'Question',
+      message: 'Yakin mau hapus?',
+      detail: `Menghapus Invoice #${id}`,
+    };
+
+    if (!mainWindow)
+      return Promise.reject(new Error('Main Window is not open'));
+
+    console.log('Open dialog');
+
+    try {
+      const { response } = await dialog.showMessageBox(mainWindow, options);
+      if (response === 0) {
+        // cancel pressed
+        return false;
+      }
+      if (response === 1) {
+        // Hapus is pressed
+        return true;
+      }
+      return false;
+    } catch (error) {
+      log.info(error);
+      return false;
+    }
+  }
+);

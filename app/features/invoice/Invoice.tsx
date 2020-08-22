@@ -101,7 +101,10 @@ export default function InvoicePage() {
         // eslint-disable-next-line react/display-name
         Cell: ({ row }: CellProps<Invoice>) => {
           return (
-            <button type="button" onClick={() => {}}>
+            <button
+              type="button"
+              onClick={() => dispatch(deleteInvoiceCall(row.values.idCol))}
+            >
               <i className="far fa-trash-alt fa-md" />
             </button>
           );
