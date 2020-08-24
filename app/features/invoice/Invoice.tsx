@@ -13,10 +13,12 @@ import {
   getInvoice,
   getStatus,
   Invoice,
+  startListening,
   getIsFetched,
   saveInvoice,
   status as invoiceStatus,
 } from './invoiceSlice';
+import { startListening as startListeningItems } from '../daftarBarang/daftarBarangSlice';
 
 export default function InvoicePage() {
   const invoices = useSelector(getInvoice);
@@ -27,7 +29,9 @@ export default function InvoicePage() {
 
   useEffect(() => {
     if (status === invoiceStatus.IDLE && !isFetched) {
-      dispatch(initializeInvoices());
+      // dispatch(initializeInvoices()); Unneeded since startListening is triggered in the beginning
+      dispatch(startListening());
+      dispatch(startListeningItems());
     }
   }, [dispatch, isFetched, status]);
 
@@ -113,29 +117,6 @@ export default function InvoicePage() {
     ],
     []
   );
-
-  const invoice = {
-    client: 'PT A',
-    client_address: {
-      address: '690 King St',
-      city: 'Cilegon',
-      state: 'Banten',
-      country: 'Indonesia',
-      postal_code: 154321,
-    },
-    date: '24/03/2019',
-    items: [
-      {
-        name: 'Paku',
-        rate: 10000,
-        quantity: 3,
-        amount: 30000,
-      },
-    ],
-    tax: 5000,
-    total: 8000,
-    id: 1,
-  };
 
   return (
     <div>

@@ -140,7 +140,7 @@ function pdfSettings() {
   return option;
 }
 
-function savePdf(win: BrowserWindow, pdfData: Buffer, invoiceId: number) {
+function savePdf(win: BrowserWindow, pdfData: Buffer, invoiceId: string) {
   const options = {
     title: 'Save file',
     defaultPath: `${app.getPath('downloads')}/invoice_${invoiceId}`,
@@ -225,7 +225,6 @@ ipcMain.on('save-invoice', (_event, invoice: Invoice) => {
 ipcMain.handle(
   'confirmDeleteInvoice',
   async (_event, id: string): Promise<boolean> => {
-    console.log(id);
     const options = {
       type: 'question',
       buttons: ['Cancel', 'Hapus'],
@@ -257,3 +256,7 @@ ipcMain.handle(
     }
   }
 );
+
+ipcMain.on('showError', (_event, errorMsg: string) => {
+  dialog.showErrorBox('Error', errorMsg);
+});

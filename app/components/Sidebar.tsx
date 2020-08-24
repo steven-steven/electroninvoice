@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-one-expression-per-line */
 import React from 'react';
 import { Link } from 'react-router-dom';
 import routes from '../constants/routes.json';
@@ -6,7 +7,7 @@ export default function Sidebar(): JSX.Element {
   return (
     <div className="w-56 bg-white fixed min-h-screen">
       <div className="h-16 px-6 text-center text-lg text-blue-600 flex items-center">
-        <span className="text-2xl">dP</span> &nbsp; Invoice App
+        <span className="text-2xl pr-2">dP</span> Invoice App
       </div>
       <div className="sidebar-icons">
         <Link to={routes.INVOICE}>

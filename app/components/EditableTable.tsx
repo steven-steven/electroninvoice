@@ -3,8 +3,6 @@
 /* eslint-disable react/jsx-key */
 import React, { useState, useEffect } from 'react';
 import { useTable, TableOptions, TableInstance, Cell } from 'react-table';
-import PropTypes from 'prop-types';
-import { Item } from 'electron';
 
 interface EditableCell extends Cell {
   updateMyData: (

@@ -13,19 +13,26 @@ import {
   updateInvoiceCall,
   selectInvoice,
   getInvoice,
-  getStatus,
+  getStatus as getInvoiceStatus,
   InvoiceRequest,
   getIsFetched,
   saveInvoice,
   status as invoiceStatus,
 } from './invoiceSlice';
+import {
+  Item,
+  getStatus as getItemStatus,
+  getItem,
+  status as itemStatus,
+} from '../daftarBarang/daftarBarangSlice';
+
 import { RootState } from '../../store';
 
 interface TableData {
   transaksi: string;
   deskripsi: string;
   jumlah: string;
-  harga: number;
+  harga: string;
 }
 interface RightInvoiceForm {
   clientName: string;
@@ -34,9 +41,25 @@ interface RightInvoiceForm {
 }
 
 export default function InvoicePage() {
-  const status = useSelector(getStatus);
+  const currInvoiceStatus = useSelector(getInvoiceStatus);
+  const currItemStatus = useSelector(getItemStatus);
+  const items = useSelector(getItem);
   const dispatch = useDispatch();
   const history = useHistory();
+
+  const itemList = React.useMemo(
+    () =>
+      Object.values(items).map((item) => {
+        return {
+          itemName: item.name,
+          itemDesc: item.defaultDesc,
+          itemRate: item.rate,
+          itemId: item.id,
+        };
+      }),
+    [items]
+  );
+
   // check if its Edit or new Invoice page
   const editQueryString = useLocation().search;
   const editId = new URLSearchParams(editQueryString).get('id');
@@ -54,12 +77,13 @@ export default function InvoicePage() {
           transaksi: item.name,
           deskripsi: '',
           jumlah: item.quantity.toString(),
-          harga: item.rate,
+          harga: item.rate.toString(),
         };
       })
     : [];
   const [rowData, setRowData] = useState<TableData[]>(initialItems);
   const [originalData] = useState(rowData);
+  const [selectedTransaction, setSelectedTransaction] = useState(''); // react-form-hook watcher doesn't seem to work for select
   const [skipPageReset, setSkipPageReset] = useState(false);
 
   // form data
@@ -67,6 +91,7 @@ export default function InvoicePage() {
     register: itemFormRegister,
     handleSubmit: itemFormHandleSubmit,
     errors: itemFormError,
+    reset: itemReset,
   } = useForm();
   const {
     register: invoiceFormRegister,
@@ -76,15 +101,17 @@ export default function InvoicePage() {
   } = useForm();
 
   const addToRowData = (data: TableData) => {
+    const chosenItem = items[data.transaksi];
     setRowData([
       ...rowData,
       {
-        transaksi: data.transaksi,
-        deskripsi: data.deskripsi,
+        transaksi: chosenItem.name,
+        deskripsi: data.deskripsi || chosenItem.defaultDesc,
         jumlah: data.jumlah,
-        harga: 3000,
+        harga: chosenItem.rate.toString(),
       },
     ]);
+    itemReset();
   };
 
   const submitInvoice = (data: RightInvoiceForm) => {
@@ -101,9 +128,9 @@ export default function InvoicePage() {
       items: rowData.map((item) => {
         return {
           name: item.transaksi,
-          rate: 3000,
+          rate: parseInt(item.harga, 10),
           quantity: parseInt(item.jumlah, 10),
-          amount: item.harga,
+          amount: parseInt(item.harga, 10) * parseInt(item.jumlah, 10),
         };
       }),
       tax: parseInt(data.tax, 10),
@@ -181,7 +208,8 @@ export default function InvoicePage() {
 
   return (
     <div>
-      {status === invoiceStatus.LOADING ? (
+      {currInvoiceStatus === invoiceStatus.LOADING ||
+      currItemStatus === itemStatus.LOADING ? (
         <div className="text-center">
           <i className="fa fa-spinner fa-pulse fa-3x fa-fw" />
         </div>
@@ -192,22 +220,35 @@ export default function InvoicePage() {
               <form onSubmit={itemFormHandleSubmit(addToRowData)}>
                 <div className="formBox text-left">
                   <label htmlFor="transaksi">
-                    Barang/Jasa
+                    Barang/Jasa *
                     <div className="relative">
                       <select
-                        className="block mb-3 h-12 w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                        className={`block mb-3 h-12 w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
+                          itemFormError.transaksi ? 'border-red-500' : ''
+                        }`}
                         id="transaksi"
                         name="transaksi"
-                        ref={itemFormRegister}
+                        onChange={(e) => {
+                          setSelectedTransaction(e.target.value);
+                        }}
+                        ref={itemFormRegister({ required: true })}
+                        defaultValue=""
                       >
-                        <option>Mc Donald Big Mac</option>
-                        <option>Donat Coklat</option>
-                        <option>Keju Krim Rasa Bluberi</option>
+                        <option disabled value="">
+                          -- select an option --
+                        </option>
+                        {itemList.map((item) => {
+                          return (
+                            <option key={item.itemId} value={item.itemId}>
+                              {item.itemName}
+                            </option>
+                          );
+                        })}
                       </select>
                     </div>
                   </label>
                   <label htmlFor="jumlah">
-                    Jumlah
+                    Jumlah *
                     <input
                       id="jumlah"
                       name="jumlah"
@@ -226,7 +267,11 @@ export default function InvoicePage() {
                       name="deskripsi"
                       ref={itemFormRegister}
                       type="text"
-                      placeholder="-"
+                      placeholder={
+                        items[selectedTransaction]
+                          ? items[selectedTransaction].defaultDesc
+                          : ''
+                      }
                       className={`w-full mb-3 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
                         itemFormError.description ? 'border-red-500' : ''
                       }`}
@@ -246,6 +291,8 @@ export default function InvoicePage() {
             <div className="tableBox mt-8 flex flex-col text-center text-gray-700 bg-white shadow-md rounded-lg p-3">
               <EditableTable
                 columns={columns}
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
                 data={rowData}
                 updateMyData={updateMyData}
                 skipPageReset={skipPageReset}
@@ -262,16 +309,16 @@ export default function InvoicePage() {
             </div>
           </div>
           <div className="rightBox flex flex-col w-full md:w-1/3">
-            <div className="invoiceInfoBox flex flex-col text-center text-gray-700 bg-white px-4 py-2 shadow-md">
-              <div className="text-2xl mb-6 mt-4">
-                {invoiceToEdit == null
-                  ? 'Invoice Baru'
-                  : `Edit invoice #${invoiceToEdit.id}`}
-              </div>
-              <form onSubmit={invoiceFormHandleSubmit(submitInvoice)}>
+            <form onSubmit={invoiceFormHandleSubmit(submitInvoice)}>
+              <div className="invoiceInfoBox flex flex-col text-center text-gray-700 bg-white px-4 py-2 shadow-md">
+                <div className="text-2xl mb-6 mt-4">
+                  {invoiceToEdit == null
+                    ? 'Invoice Baru'
+                    : `Edit invoice #${invoiceToEdit.id}`}
+                </div>
                 <div className="formBox text-left">
                   <label htmlFor="clientName">
-                    Nama Client
+                    Nama Client *
                     <input
                       id="clientName"
                       name="clientName"
@@ -287,7 +334,7 @@ export default function InvoicePage() {
                     />
                   </label>
                   <label htmlFor="date">
-                    Tanggal Invoice
+                    Tanggal Invoice *
                     <input
                       id="date"
                       name="date"
@@ -298,6 +345,7 @@ export default function InvoicePage() {
                               'YYYY-MM-DD'
                             )
                       }
+                      disabled={invoiceToEdit != null}
                       type="date"
                       ref={invoiceFormRegister({ required: true })}
                       placeholder="-"
@@ -307,13 +355,13 @@ export default function InvoicePage() {
                     />
                   </label>
                   <label htmlFor="tax">
-                    Pajak
+                    Pajak *
                     <input
                       id="tax"
                       name="tax"
                       type="number"
                       defaultValue={
-                        invoiceToEdit == null ? '0' : invoiceToEdit.tax
+                        invoiceToEdit == null ? 0 : invoiceToEdit.tax
                       }
                       min="0"
                       ref={invoiceFormRegister({ required: true })}
@@ -324,38 +372,38 @@ export default function InvoicePage() {
                     />
                   </label>
                 </div>
-                <div className="actionBox mt-12">
+              </div>
+              <div className="totalBox font-display text-2xl bg-white px-4 py-2 mt-8 mb-10 md:mb-0 shadow-md">
+                <span className="text-black">Total:</span>
+                <span className="pl-3 text-gray-700 font-hairline">
+                  {`Rp. ${
+                    rowData.reduce((a, s) => {
+                      // eslint-disable-next-line no-param-reassign
+                      a += parseInt(s.harga, 10) * parseInt(s.jumlah, 10);
+                      return a;
+                    }, 0) + parseInt(tax, 10)
+                  }`}
+                </span>
+              </div>
+              <div className="totalBox font-display text-xl bg-white px-2 py-2 mt-8 mb-10 md:mb-0 shadow-md">
+                <button
+                  type="submit"
+                  name="addInvoice"
+                  className="block w-full bg-transparent hover:bg-blue-600 text-black font-semibold hover:text-white py-2 px-4 border border-black hover:border-transparent rounded"
+                >
+                  Simpan
+                </button>
+                {invoiceToEdit && (
                   <button
-                    type="submit"
-                    name="addInvoice"
-                    className="block w-full mb-3 bg-transparent hover:bg-blue-600 text-black font-semibold hover:text-white py-2 px-4 border border-black hover:border-transparent rounded"
+                    type="button"
+                    onClick={() => dispatch(saveInvoice(invoiceToEdit.id))}
+                    className="block w-full mb-3 bg-black hover:bg-blue-600 text-white font-semibold hover:text-white py-2 px-4 border border-black hover:border-transparent rounded"
                   >
-                    Simpan
+                    Download PDF
                   </button>
-                  {invoiceToEdit && (
-                    <button
-                      type="button"
-                      onClick={() => dispatch(saveInvoice(invoiceToEdit.id))}
-                      className="block w-full mb-3 bg-black hover:bg-blue-600 text-white font-semibold hover:text-white py-2 px-4 border border-black hover:border-transparent rounded"
-                    >
-                      Download PDF
-                    </button>
-                  )}
-                </div>
-              </form>
-            </div>
-            <div className="totalBox font-display text-2xl bg-white px-4 py-2 mt-8 mb-10 md:mb-0 shadow-md">
-              <span className="text-black">Total:</span>
-              <span className="pl-3 text-gray-700 font-hairline">
-                {`Rp. ${
-                  rowData.reduce((a, s) => {
-                    // eslint-disable-next-line no-param-reassign
-                    a += s.harga * parseInt(s.jumlah, 10);
-                    return a;
-                  }, 0) + parseInt(tax, 10)
-                }`}
-              </span>
-            </div>
+                )}
+              </div>
+            </form>
           </div>
         </div>
       )}

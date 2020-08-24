@@ -4,6 +4,7 @@ import axios from 'axios';
 import { ipcRenderer } from 'electron';
 // eslint-disable-next-line import/no-cycle
 import { AppThunk, RootState, AppDispatch } from '../../store';
+import database, { firebase } from '../../firebase';
 
 export interface InvoiceRequest {
   client: string;
@@ -20,7 +21,7 @@ export interface InvoiceRequest {
 }
 
 export interface Invoice extends InvoiceRequest {
-  id: number;
+  id: string;
   createdAt: string;
   total: number;
 }
@@ -44,7 +45,7 @@ export const status = {
 const invoiceSlice = createSlice({
   name: 'invoice',
   initialState: {
-    selectedInvoice: null as number | null,
+    selectedInvoice: null as string | null,
     invoices: {} as Invoices,
     status: status.IDLE,
     isFetched: false,
@@ -68,7 +69,7 @@ const invoiceSlice = createSlice({
         isFetched: true,
       };
     },
-    deleteInvoice: (state, id: PayloadAction<number>) => {
+    deleteInvoice: (state, id: PayloadAction<string>) => {
       const { [id.payload]: value, ...docsToKeep } = state.invoices;
       return {
         ...state,
@@ -86,7 +87,7 @@ const invoiceSlice = createSlice({
         status: status.IDLE,
       };
     },
-    selectInvoice: (state, id: PayloadAction<number>) => {
+    selectInvoice: (state, id: PayloadAction<string>) => {
       return {
         ...state,
         selectedInvoice: id.payload,
@@ -96,6 +97,12 @@ const invoiceSlice = createSlice({
       return {
         ...state,
         status: status.LOADING,
+      };
+    },
+    setIdle: (state) => {
+      return {
+        ...state,
+        status: status.IDLE,
       };
     },
   },
@@ -108,6 +115,7 @@ export const {
   updateInvoice,
   selectInvoice,
   setLoading,
+  setIdle,
 } = invoiceSlice.actions;
 
 export const initializeInvoices = (): AppThunk => {
@@ -115,7 +123,11 @@ export const initializeInvoices = (): AppThunk => {
     dispatch(setLoading());
     return axios
       .get('https://go-invoice-api.herokuapp.com/allInvoice')
-      .then(({ data }) => dispatch(loadAllInvoice(data.Invoices)));
+      .then(({ data }) => dispatch(loadAllInvoice(data.Invoices)))
+      .catch((e) => {
+        ipcRenderer.send('showError', `Gagal ng-load invoice: ${e}`);
+        dispatch(setIdle());
+      });
   };
 };
 
@@ -124,51 +136,71 @@ export const addInvoiceCall = (newInvoice: InvoiceRequest): AppThunk => {
     dispatch(setLoading());
     return axios
       .post('https://go-invoice-api.herokuapp.com/invoice', newInvoice)
-      .then(({ data }) => dispatch(addInvoice(data.Invoice)));
+      .then(({ data }) => dispatch(addInvoice(data.Invoice)))
+      .catch((e) => {
+        ipcRenderer.send('showError', `Gagal membuat invoice baru: ${e}`);
+        dispatch(setIdle());
+      });
   };
 };
 
-export const deleteInvoiceCall = (id: number): AppThunk => {
+export const deleteInvoiceCall = (id: string): AppThunk => {
   return async (dispatch: AppDispatch) => {
-    const isToDelete = await ipcRenderer.invoke(
-      'confirmDeleteInvoice',
-      id.toString()
-    );
-    if (!isToDelete) {
-      return;
-    }
-    dispatch(setLoading());
-    const { data } = await axios.delete(
-      `https://go-invoice-api.herokuapp.com/invoice/${id}`
-    );
-    if (data.Success) {
-      dispatch(deleteInvoice(id));
+    try {
+      const isToDelete = await ipcRenderer.invoke('confirmDeleteInvoice', id);
+      if (!isToDelete) {
+        return;
+      }
+      dispatch(setLoading());
+      const { data } = await axios.delete(
+        `https://go-invoice-api.herokuapp.com/invoice/${id}`
+      );
+      if (data.Success) {
+        dispatch(deleteInvoice(id));
+      }
+    } catch (e) {
+      ipcRenderer.send('showError', 'Gagal menghapus');
+      dispatch(setIdle());
     }
   };
 };
 
 export const updateInvoiceCall = (
-  id: number,
+  id: string,
   newInvoice: InvoiceRequest
 ): AppThunk => {
   return (dispatch: AppDispatch) => {
     dispatch(setLoading());
+    console.log(newInvoice);
     return axios
       .put(`https://go-invoice-api.herokuapp.com/invoice/${id}`, newInvoice)
-      .then(({ data }) => dispatch(updateInvoice(data.Invoice)));
+      .then(({ data }) => dispatch(updateInvoice(data.Invoice)))
+      .catch((e) => {
+        ipcRenderer.send('showError', `Gagal mengedit: ${e}`);
+        dispatch(setIdle());
+      });
   };
 };
 
-export const saveInvoice = (id: number): AppThunk => {
+export const saveInvoice = (id: string): AppThunk => {
   return (dispatch: AppDispatch, getState: () => RootState) => {
     const invoiceState = getState().invoice;
     if (invoiceState.invoices) {
-      return ipcRenderer.send(
-        'save-invoice',
-        invoiceState.invoices[id.toString()]
-      );
+      return ipcRenderer.send('save-invoice', invoiceState.invoices[id]);
     }
     return false;
+  };
+};
+
+export const startListening = (): AppThunk => {
+  return (dispatch: AppDispatch, getState: () => RootState) => {
+    database.ref('invoice/documents').on('value', (invoiceSnapshot) => {
+      // const invoice = invoiceSnapshot.val();
+      dispatch(setLoading());
+      return axios
+        .get('https://go-invoice-api.herokuapp.com/allInvoice')
+        .then(({ data }) => dispatch(loadAllInvoice(data.Invoices)));
+    });
   };
 };
 
