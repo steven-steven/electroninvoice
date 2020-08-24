@@ -205,16 +205,17 @@ ipcMain.on('save-invoice', (_event, invoice: Invoice) => {
     })
   );
   ejse.data('date', invoice.date);
-  ejse.data('tax', formatPrice(invoice.tax));
+  ejse.data('taxPercent', invoice.tax);
   ejse.data(
-    'total',
-    formatPrice(Math.round(invoice.tax * invoice.total) + invoice.total)
+    'tax',
+    formatPrice(Math.round((invoice.tax / 100) * invoice.subtotal))
   );
+  ejse.data('total', formatPrice(invoice.total));
   ejse.data(
     'terbilang',
     angkaTerbilang(invoice.total.toString()).toUpperCase()
   );
-  ejse.data('subtotal', formatPrice(invoice.total));
+  ejse.data('subtotal', formatPrice(invoice.subtotal));
   ejse.data('id', invoice.id);
 
   ejse.data('iconPath', `file://${__dirname}/icon.png`);
@@ -246,15 +247,15 @@ ipcMain.on('save-invoice', (_event, invoice: Invoice) => {
 });
 
 ipcMain.handle(
-  'confirmDeleteInvoice',
-  async (_event, id: string): Promise<boolean> => {
+  'confirmDelete',
+  async (_event, msg: string): Promise<boolean> => {
     const options = {
       type: 'question',
       buttons: ['Cancel', 'Hapus'],
       defaultId: 2,
       title: 'Question',
       message: 'Yakin mau hapus?',
-      detail: `Menghapus Invoice #${id}`,
+      detail: msg,
     };
 
     if (!mainWindow)

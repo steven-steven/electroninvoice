@@ -157,9 +157,7 @@
                     <%= items[i].name %>
                   </td>
 
-                  <td>
-                    <%= items[i].description %>
-                  </td>
+                  <td style="white-space: pre-wrap;"><%= items[i].description %></td>
 
                   <td>
                     <%= items[i].quantity %>
@@ -190,7 +188,7 @@
                 <td colspan="4" rowspan="2">
                   Terbilang: # <span style="font-family: helvetica-light;"><%= terbilang %></span> #
                 </td>
-                <td style="padding-left:15px;">PPN 10%</td>
+                <td style="padding-left:15px;">PPN <%= taxPercent %>%</td>
                 <td>
                     <%= tax %>
                 </td>

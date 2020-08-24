@@ -117,9 +117,13 @@ export const addItemCall = (newItem: ItemRequest): AppThunk => {
 };
 
 export const deleteItemCall = (id: string): AppThunk => {
-  return async (dispatch: AppDispatch) => {
+  return async (dispatch: AppDispatch, getState: () => RootState) => {
     try {
-      const isToDelete = await ipcRenderer.invoke('confirmDeleteInvoice', id);
+      const barangName = getState().daftarBarang.items[id].name;
+      const isToDelete = await ipcRenderer.invoke(
+        'confirmDelete',
+        `Menghapus Barang: ${barangName}`
+      );
       if (!isToDelete) {
         return;
       }

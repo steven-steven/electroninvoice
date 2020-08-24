@@ -24,6 +24,7 @@ export interface Invoice extends InvoiceRequest {
   id: string;
   createdAt: string;
   total: number;
+  subtotal: number;
 }
 
 export interface Item {
@@ -148,7 +149,10 @@ export const addInvoiceCall = (newInvoice: InvoiceRequest): AppThunk => {
 export const deleteInvoiceCall = (id: string): AppThunk => {
   return async (dispatch: AppDispatch) => {
     try {
-      const isToDelete = await ipcRenderer.invoke('confirmDeleteInvoice', id);
+      const isToDelete = await ipcRenderer.invoke(
+        'confirmDelete',
+        `Menghapus Invoice #${id}`
+      );
       if (!isToDelete) {
         return;
       }
@@ -172,7 +176,6 @@ export const updateInvoiceCall = (
 ): AppThunk => {
   return (dispatch: AppDispatch) => {
     dispatch(setLoading());
-    console.log(newInvoice);
     return axios
       .put(`https://go-invoice-api.herokuapp.com/invoice/${id}`, newInvoice)
       .then(({ data }) => dispatch(updateInvoice(data.Invoice)))

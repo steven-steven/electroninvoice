@@ -70,7 +70,7 @@ export default function InvoicePage() {
       },
       {
         // Make an expander cell
-        Header: 'Download',
+        Header: 'Unduh',
         id: 'download',
         collapse: true,
         // eslint-disable-next-line react/display-name
@@ -86,7 +86,7 @@ export default function InvoicePage() {
         },
       },
       {
-        Header: 'Edit',
+        Header: 'Ubah',
         id: 'edit',
         collapse: true,
         // eslint-disable-next-line react/display-name
@@ -104,7 +104,7 @@ export default function InvoicePage() {
         },
       },
       {
-        Header: 'Delete',
+        Header: 'Hapus',
         id: 'delete',
         collapse: true,
         // eslint-disable-next-line react/display-name
