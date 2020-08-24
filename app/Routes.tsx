@@ -1,9 +1,13 @@
 /* eslint react/jsx-props-no-spreading: off */
-import React from 'react';
+import React, { useContext } from 'react';
 import { Switch, Route } from 'react-router-dom';
 import routes from './constants/routes.json';
 import App from './containers/App';
 import HomePage from './containers/HomePage';
+import { UserContext } from './features/provider/UserProvider';
+import SignIn from './containers/SignIn';
+import SignUp from './containers/SignUp';
+import PasswordReset from './containers/PasswordReset';
 
 // Lazily load routes and code split with webpack
 const LazyInvoicePage = React.lazy(() =>
@@ -39,13 +43,20 @@ const DaftarBarangPage = (props: Record<string, any>) => (
 );
 
 export default function Routes() {
-  return (
+  const user = useContext(UserContext);
+  return user ? (
     <App>
       <Switch>
-        <Route path={routes.INVOICE} component={InvoicePage} />
         <Route path={routes.ADDINVOICE} component={AddInvoicePage} />
         <Route path={routes.DAFTARBARANG} component={DaftarBarangPage} />
+        <Route path={routes.INVOICE} component={InvoicePage} />
       </Switch>
     </App>
+  ) : (
+    <Switch>
+      <Route path="/signup" component={SignUp} />
+      <Route path="/" component={SignIn} />
+      <Route path="/passwordReset" component={PasswordReset} />
+    </Switch>
   );
 }

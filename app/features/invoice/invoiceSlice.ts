@@ -4,7 +4,7 @@ import axios from 'axios';
 import { ipcRenderer } from 'electron';
 // eslint-disable-next-line import/no-cycle
 import { AppThunk, RootState, AppDispatch } from '../../store';
-import database, { firebase } from '../../firebase';
+import database from '../../firebase';
 
 export interface InvoiceRequest {
   client: string;

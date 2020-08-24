@@ -20,7 +20,7 @@ interface TableCells {
   itemId: string;
 }
 
-export default function InvoicePage() {
+export default function DaftarBarangPage() {
   const status = useSelector(getStatus);
   const items = useSelector(getItem);
   const dispatch = useDispatch();
