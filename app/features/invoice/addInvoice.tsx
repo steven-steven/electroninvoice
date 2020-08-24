@@ -204,6 +204,9 @@ export default function InvoicePage() {
     []
   );
 
+  const calculateTotal = (total: number, tax: number) =>
+    total + Math.round((tax / 100) * total);
+
   let tax = invoiceWatch('tax');
   if (tax == null) tax = 0;
 
@@ -263,11 +266,11 @@ export default function InvoicePage() {
                   </label>
                   <label htmlFor="deskripsi">
                     Deskripsi
-                    <input
+                    <textarea
                       id="deskripsi"
                       name="deskripsi"
                       ref={itemFormRegister}
-                      type="text"
+                      rows={1}
                       placeholder={
                         items[selectedTransaction]
                           ? items[selectedTransaction].defaultDesc
@@ -356,13 +359,13 @@ export default function InvoicePage() {
                     />
                   </label>
                   <label htmlFor="tax">
-                    Pajak *
+                    Pajak (%) *
                     <input
                       id="tax"
                       name="tax"
                       type="number"
                       defaultValue={
-                        invoiceToEdit == null ? 0 : invoiceToEdit.tax
+                        invoiceToEdit == null ? 10 : invoiceToEdit.tax
                       }
                       min="0"
                       ref={invoiceFormRegister({ required: true })}
@@ -372,18 +375,45 @@ export default function InvoicePage() {
                       }`}
                     />
                   </label>
+                  <label htmlFor="catataninvoice">
+                    Catatan Invoice
+                    <textarea
+                      id="catataninvoice"
+                      name="catataninvoice"
+                      ref={itemFormRegister}
+                      rows={1}
+                      defaultValue="Pembayaran : Cheque/Giro/Transfer dianggap syah jika sudah aktif pada rekening kami"
+                      className={`w-full mb-3 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
+                        itemFormError.catataninvoice ? 'border-red-500' : ''
+                      }`}
+                    />
+                  </label>
+                  <label htmlFor="catatankwitansi">
+                    Catatan Kwitansi
+                    <textarea
+                      id="catatankwitansi"
+                      name="catatankwitansi"
+                      ref={itemFormRegister}
+                      rows={1}
+                      defaultValue="Pembayaran : Cheque/Giro/Transfer ditujukan kepada: AN; PT. Dwiprima Karyaguna, Ac: 116.00.04682.26.7, Bank Mandiri Cilegon"
+                      className={`w-full mb-3 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
+                        itemFormError.catatankwitansi ? 'border-red-500' : ''
+                      }`}
+                    />
+                  </label>
                 </div>
               </div>
               <div className="totalBox font-display text-2xl bg-white px-4 py-2 mt-8 mb-10 md:mb-0 shadow-md">
                 <span className="text-black">Total:</span>
                 <span className="pl-3 text-gray-700 font-hairline">
-                  {`Rp. ${
+                  {`Rp. ${calculateTotal(
                     rowData.reduce((a, s) => {
                       // eslint-disable-next-line no-param-reassign
                       a += parseInt(s.harga, 10) * parseInt(s.jumlah, 10);
                       return a;
-                    }, 0) + parseInt(tax, 10)
-                  }`}
+                    }, 0),
+                    parseInt(tax, 10)
+                  )}`}
                 </span>
               </div>
               <div className="totalBox font-display text-xl bg-white px-3 py-3 mt-8 mb-10 md:mb-0 shadow-md">

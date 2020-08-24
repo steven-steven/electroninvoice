@@ -138,10 +138,10 @@ export default function InvoicePage() {
               </label>
               <label htmlFor="deskripsi">
                 Deskripsi Barang
-                <input
+                <textarea
                   id="deskripsi"
                   name="descriptionCol"
-                  type="text"
+                  rows={1}
                   ref={itemFormRegister({ required: true })}
                   className={`w-full mb-8 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
                     itemFormError.descriptionCol ? 'border-red-500' : ''

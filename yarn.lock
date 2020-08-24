@@ -1235,6 +1235,11 @@
     ajv "^6.12.0"
     ajv-keywords "^3.4.1"
 
+"@develoka/angka-terbilang-js@^1.2.3":
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/@develoka/angka-terbilang-js/-/angka-terbilang-js-1.2.3.tgz#e99b91ba4b9b0b18b2bf917190099a456b8559a6"
+  integrity sha512-X2sq512oqYS4NsthQhhAJDcgUEBxose1Y6aaNpO5CuREWvsxQo1kaI9IBE9xvgTuVsH+qvXeA/Adzq5iB2xbeg==
+
 "@electron/get@^1.0.1":
   version "1.12.2"
   resolved "https://registry.yarnpkg.com/@electron/get/-/get-1.12.2.tgz#6442066afb99be08cefb9a281e4b4692b33764f3"

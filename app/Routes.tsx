@@ -42,9 +42,9 @@ export default function Routes() {
   return (
     <App>
       <Switch>
-        <Route path={routes.INVOICE} component={InvoicePage} />
         <Route path={routes.ADDINVOICE} component={AddInvoicePage} />
         <Route path={routes.DAFTARBARANG} component={DaftarBarangPage} />
+        <Route path={routes.INVOICE} component={InvoicePage} />
       </Switch>
     </App>
   );

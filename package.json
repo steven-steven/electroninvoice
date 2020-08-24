@@ -277,6 +277,7 @@
     "webpack-merge": "^5.0.9"
   },
   "dependencies": {
+    "@develoka/angka-terbilang-js": "^1.2.3",
     "@firebase/app": "^0.6.10",
     "@firebase/auth": "^0.14.9",
     "@firebase/database": "^0.6.11",

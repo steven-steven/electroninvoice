@@ -125,16 +125,6 @@ export default function InvoicePage() {
 
   return (
     <div>
-      <div className="search-container relative m-1">
-        <input
-          type="text"
-          placeholder="Search"
-          className="bg-grey-darker text-grey-light text-sm w-full p-2 pl-10 h-12 border border-grey-dark rounded"
-        />
-        <div className="absolute top-0 py-3 px-4 text-gray-400">
-          <i className="fas fa-search fa-sm" />
-        </div>
-      </div>
       <div className="mt-8 flex items-center justify-center">
         {status === invoiceStatus.LOADING ? (
           <div className="text-center">

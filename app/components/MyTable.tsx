@@ -23,7 +23,7 @@ export default function MyTable({
         sortBy: [
           {
             id: 'idCol',
-            desc: false,
+            desc: true,
           },
         ],
       },

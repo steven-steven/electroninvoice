@@ -16,6 +16,9 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import ejse from 'ejs-electron';
 import fs from 'fs';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import angkaTerbilang from '@develoka/angka-terbilang-js';
 import MenuBuilder from './menu';
 import { Invoice } from './features/invoice/invoiceSlice';
 
@@ -140,6 +143,10 @@ function pdfSettings() {
   return option;
 }
 
+function formatPrice(price: number) {
+  return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
 function savePdf(win: BrowserWindow, pdfData: Buffer, invoiceId: string) {
   const options = {
     title: 'Save file',
@@ -187,11 +194,27 @@ ipcMain.on('save-invoice', (_event, invoice: Invoice) => {
   }
 
   ejse.data('client', invoice.client);
-  ejse.data('items', invoice.items);
+  ejse.data(
+    'items',
+    invoice.items.map((item) => {
+      return {
+        ...item,
+        amount: formatPrice(item.amount),
+        rate: formatPrice(item.rate),
+      };
+    })
+  );
   ejse.data('date', invoice.date);
-  ejse.data('tax', invoice.tax);
-  ejse.data('total', invoice.total);
-  ejse.data('subtotal', invoice.total - invoice.tax);
+  ejse.data('tax', formatPrice(invoice.tax));
+  ejse.data(
+    'total',
+    formatPrice(Math.round(invoice.tax * invoice.total) + invoice.total)
+  );
+  ejse.data(
+    'terbilang',
+    angkaTerbilang(invoice.total.toString()).toUpperCase()
+  );
+  ejse.data('subtotal', formatPrice(invoice.total));
   ejse.data('id', invoice.id);
 
   ejse.data('iconPath', `file://${__dirname}/icon.png`);
