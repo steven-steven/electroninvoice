@@ -12,10 +12,11 @@ export default function UserProvider({ children }: Props) {
 
   useEffect(() => {
     auth.onAuthStateChanged(async (userAuth) => {
+      if (user) {
+        // User is signed in.
+        setUser(userAuth);
+      }
       // TODO: get user doc
-      console.log("changed!");
-      console.log(userAuth);
-      setUser(userAuth);
     });
   });
 
