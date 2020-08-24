@@ -29,6 +29,7 @@ export interface Invoice extends InvoiceRequest {
 export interface Item {
   name: string;
   rate: number;
+  description: string;
   quantity: number;
   amount: number;
 }

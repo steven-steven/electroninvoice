@@ -61,15 +61,18 @@ export default function InvoicePage() {
       {
         Header: 'Tanggal Invoice',
         accessor: 'dateCol',
+        disableSortBy: true,
       },
       {
         Header: 'Total',
         accessor: 'totalCol',
+        disableSortBy: true,
       },
       {
         // Make an expander cell
         Header: 'Download',
         id: 'download',
+        collapse: true,
         // eslint-disable-next-line react/display-name
         Cell: ({ row }: CellProps<Invoice>) => {
           return (
@@ -85,6 +88,7 @@ export default function InvoicePage() {
       {
         Header: 'Edit',
         id: 'edit',
+        collapse: true,
         // eslint-disable-next-line react/display-name
         Cell: ({ row }: CellProps<Invoice>) => {
           return (
@@ -102,6 +106,7 @@ export default function InvoicePage() {
       {
         Header: 'Delete',
         id: 'delete',
+        collapse: true,
         // eslint-disable-next-line react/display-name
         Cell: ({ row }: CellProps<Invoice>) => {
           return (

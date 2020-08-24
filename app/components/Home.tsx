@@ -7,7 +7,6 @@ export default function Home(): JSX.Element {
   return (
     <div className={styles.container} data-tid="container">
       <h2>Dwiprima Invoice</h2>
-      <Link to={routes.COUNTER}>Counter Test</Link>
       <Link to={routes.INVOICE}>Mulai Buat Invoice</Link>
     </div>
   );

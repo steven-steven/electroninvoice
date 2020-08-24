@@ -75,7 +75,7 @@ export default function InvoicePage() {
     ? invoiceToEdit.items.map((item) => {
         return {
           transaksi: item.name,
-          deskripsi: '',
+          deskripsi: item.description,
           jumlah: item.quantity.toString(),
           harga: item.rate.toString(),
         };
@@ -128,6 +128,7 @@ export default function InvoicePage() {
       items: rowData.map((item) => {
         return {
           name: item.transaksi,
+          description: item.deskripsi,
           rate: parseInt(item.harga, 10),
           quantity: parseInt(item.jumlah, 10),
           amount: parseInt(item.harga, 10) * parseInt(item.jumlah, 10),
@@ -385,7 +386,7 @@ export default function InvoicePage() {
                   }`}
                 </span>
               </div>
-              <div className="totalBox font-display text-xl bg-white px-2 py-2 mt-8 mb-10 md:mb-0 shadow-md">
+              <div className="totalBox font-display text-xl bg-white px-3 py-3 mt-8 mb-10 md:mb-0 shadow-md">
                 <button
                   type="submit"
                   name="addInvoice"
@@ -397,7 +398,7 @@ export default function InvoicePage() {
                   <button
                     type="button"
                     onClick={() => dispatch(saveInvoice(invoiceToEdit.id))}
-                    className="block w-full mb-3 bg-black hover:bg-blue-600 text-white font-semibold hover:text-white py-2 px-4 border border-black hover:border-transparent rounded"
+                    className="block w-full mt-3 bg-black hover:bg-blue-600 text-white font-semibold hover:text-white py-2 px-4 border border-black hover:border-transparent rounded"
                   >
                     Download PDF
                   </button>

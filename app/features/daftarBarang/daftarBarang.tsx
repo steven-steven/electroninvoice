@@ -67,6 +67,7 @@ export default function InvoicePage() {
       {
         Header: 'Deskripsi',
         accessor: 'descriptionCol',
+        disableSortBy: true,
       },
       {
         Header: 'Delete',

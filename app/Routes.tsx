@@ -5,18 +5,6 @@ import routes from './constants/routes.json';
 import App from './containers/App';
 import HomePage from './containers/HomePage';
 
-// TODO: Remove
-// Lazily load routes and code split with webpack
-const LazyCounterPage = React.lazy(() =>
-  import(/* webpackChunkName: "CounterPage" */ './containers/CounterPage')
-);
-
-const CounterPage = (props: Record<string, any>) => (
-  <React.Suspense fallback={<h1>Loading...</h1>}>
-    <LazyCounterPage {...props} />
-  </React.Suspense>
-);
-
 // Lazily load routes and code split with webpack
 const LazyInvoicePage = React.lazy(() =>
   import(/* webpackChunkName: "InvoicePage" */ './containers/InvoicePage')
@@ -57,8 +45,6 @@ export default function Routes() {
         <Route path={routes.INVOICE} component={InvoicePage} />
         <Route path={routes.ADDINVOICE} component={AddInvoicePage} />
         <Route path={routes.DAFTARBARANG} component={DaftarBarangPage} />
-        <Route path={routes.COUNTER} component={CounterPage} />
-        <Route path={routes.HOME} component={HomePage} />
       </Switch>
     </App>
   );
