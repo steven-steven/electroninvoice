@@ -23,6 +23,7 @@ const EditableCell = ({
     e:
       | React.ChangeEvent<HTMLInputElement>
       | React.ChangeEvent<HTMLTextAreaElement>
+      | React.ChangeEvent<HTMLSelectElement>
   ) => {
     setValue(e.target.value);
   };
@@ -46,6 +47,35 @@ const EditableCell = ({
       />
     );
   }
+  if (id === 'isMetric') {
+    return (
+      <select
+        className="w-full h-10 p-2 focus:outline-none focus:shadow-outline border border-gray-300 rounded leading-tight"
+        required
+        value={value}
+        onChange={onChange}
+        onBlur={onBlur}
+      >
+        <option value="1">metric</option>
+        <option value="0">satuan</option>
+      </select>
+    );
+  }
+  if (id === 'jumlah' || id === 'harga') {
+    return (
+      <input
+        required
+        min="1"
+        step="any"
+        type="number"
+        value={value}
+        onChange={onChange}
+        onBlur={onBlur}
+        className="w-full break-words p-2 focus:outline-none focus:shadow-outline border border-gray-300 rounded-md appearance-none leading-normal"
+      />
+    );
+  }
+
   return (
     <input
       className="w-full break-words p-2 focus:outline-none focus:shadow-outline border border-gray-300 rounded-md appearance-none leading-normal"

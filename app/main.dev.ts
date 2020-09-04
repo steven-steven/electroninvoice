@@ -144,7 +144,14 @@ function pdfSettings() {
 }
 
 function formatPrice(price: number) {
-  return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const splitted = price.toString().split('.');
+  if (splitted.length === 1) {
+    return splitted[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+  return `${splitted[0].replace(
+    /\B(?=(\d{3})+(?!\d))/g,
+    '.'
+  )},${splitted[1].padEnd(3, '0')}`;
 }
 
 function savePdf(win: BrowserWindow, pdfData: Buffer, invoiceId: string) {
@@ -180,7 +187,13 @@ function savePdf(win: BrowserWindow, pdfData: Buffer, invoiceId: string) {
 ipcMain.on('save-invoice', (_event, invoice: Invoice) => {
   console.log(invoice);
   if (invoice.client_address) {
-    const addressLine1 = invoice.client_address.address;
+    const addressLine1 = [
+      invoice.client_address.address,
+      invoice.client_address.postal_code,
+    ]
+      .filter(Boolean)
+      .join(', ');
+
     const addressLine2 = [
       invoice.client_address.city,
       invoice.client_address.state,
@@ -192,15 +205,22 @@ ipcMain.on('save-invoice', (_event, invoice: Invoice) => {
     ejse.data('addressLine1', addressLine1);
     ejse.data('addressLine2', addressLine2);
   }
+  ejse.data('catatanInvoice', invoice.catatanInvoice);
+  ejse.data('catatanKwitansi', invoice.catatanKwitansi);
 
   ejse.data('client', invoice.client);
   ejse.data(
     'items',
     invoice.items.map((item) => {
+      const isUnitMetric = item.metricQuantity && item.metricQuantity > 0;
       return {
         ...item,
         amount: formatPrice(item.amount),
         rate: formatPrice(item.rate),
+        quantity: isUnitMetric
+          ? formatPrice(item.metricQuantity / 1000.0)
+          : item.quantity,
+        isMetric: isUnitMetric,
       };
     })
   );

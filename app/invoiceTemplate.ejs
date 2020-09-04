@@ -94,10 +94,10 @@
               <td>KEPADA YTH :</td>
               <td>
                 <%= client %> <br/>
-                <%if (addressLine1) { %>
+                <%if (locals.addressLine1) { %>
                   <%= addressLine1 %> <br>
                 <% } %>
-                <%if (addressLine2) { %>
+                <%if (locals.addressLine2) { %>
                   <%= addressLine2 %> <br>
                 <% } %>
               </td>
@@ -134,16 +134,17 @@
 
                 <td style="width:15%">
                   Jumlah
+                  <span style="font-weight: lighter; display: block;">(unit / m<sup>2</sup>)</span>
                 </td>
 
                 <td style="width:15%">
                   Harga Satuan
-                  <span style="font-weight: lighter; display: block;">(Rp.)</span>
+                  <span style="padding-top: 4px; font-weight: lighter; display: block;">(Rp)</span>
                 </td>
 
                 <td style="width:15%">
                   Nilai
-                  <span style="font-weight: lighter; display: block;">(Rp.)</span>
+                  <span style="padding-top: 4px; font-weight: lighter; display: block;">(Rp)</span>
                 </td>
             </tr>
 
@@ -161,7 +162,6 @@
 
                   <td>
                     <%= items[i].quantity %>
-
                   </td>
 
                   <td>
@@ -205,7 +205,7 @@
         <div style="display:flex; margin-top:30px;">
           <div style="flex-basis:70%">
             <b><u>Catatan</u></b>
-            <span style="display: block; padding-right:100px;">Pembayaran : Cheque/Giro/Transfer dianggap syah jika sudah aktif pada rekening kami</span>
+            <span style="display: block; padding-right:100px;"><%= catatanInvoice %></span>
           </div>
           <div style="text-align:center;">
             <p>Hormat Kami</p>

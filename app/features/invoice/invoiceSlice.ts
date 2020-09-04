@@ -15,6 +15,8 @@ export interface InvoiceRequest {
     country?: string;
     postal_code?: string;
   };
+  catatanInvoice: string;
+  catatanKwitansi: string;
   date: string;
   items: Item[];
   tax: number;
@@ -31,6 +33,7 @@ export interface Item {
   name: string;
   rate: number;
   description: string;
+  metricQuantity: number;
   quantity: number;
   amount: number;
 }

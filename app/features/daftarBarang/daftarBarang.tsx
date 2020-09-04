@@ -122,19 +122,23 @@ export default function InvoicePage() {
                 />
               </label>
               <label htmlFor="harga">
-                Harga Satuan
-                <input
-                  id="harga"
-                  name="rateCol"
-                  type="number"
-                  defaultValue={0}
-                  min="0"
-                  ref={itemFormRegister({ required: true })}
-                  placeholder="Rp. -"
-                  className={`w-full mb-8 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
-                    itemFormError.tax ? 'border-red-500' : ''
-                  }`}
-                />
+                Harga Satuan/meteran *
+                <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span className="text-gray-600">Rp. </span>
+                  </div>
+                  <input
+                    id="harga"
+                    name="rateCol"
+                    type="number"
+                    defaultValue={0}
+                    min="0"
+                    ref={itemFormRegister({ required: true })}
+                    className={`w-full pl-12 mb-8 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
+                      itemFormError.tax ? 'border-red-500' : ''
+                    }`}
+                  />
+                </div>
               </label>
               <label htmlFor="deskripsi">
                 Deskripsi Barang
