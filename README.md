@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="/readme_assets/PHOTO-2020-09-06-09-52-35 3.jpg" width="50" />
+ </p>
+
 Electron app that powers the DP Invoice APP. See the [Backend](https://github.com/steven-steven/GoInvoice) built in Golang.
 
 This app is created with:
@@ -25,17 +29,14 @@ yarn package
 ```
 
 ## Demo
-Opening the App and edit existing invoices
-![Open and edit Demo](https://github.com/steven-steven/Blog/blob/master/static/blogAssets/creating-an-invoice-app-with-electron-and-go/openAndEditDemo.gif)
+Add + Edit Invoice
+<img src="/readme_assets/create.gif" width="300" />
 
-Download pdf
-![Download Demo](https://github.com/steven-steven/Blog/blob/master/static/blogAssets/creating-an-invoice-app-with-electron-and-go/downloadDemo.gif)
+Add new inventory Item
+<img src="/readme_assets/newItem.gif" width="300" />
 
-Create New Invoice
-![New Item Demo](https://github.com/steven-steven/Blog/blob/master/static/blogAssets/creating-an-invoice-app-with-electron-and-go/newInvoiceDemo.gif)
-
-Create New Item as it appears when creating new invoice
-![New Item Demo](https://github.com/steven-steven/Blog/blob/master/static/blogAssets/creating-an-invoice-app-with-electron-and-go/createNewItemDemo.gif)
+Download and edit existing invoice PDF
+<img src="/readme_assets/editPdf.gif" width="300" />
 
 Error Handling when Offline and works again once the internet is available
-![Offline Demo](https://github.com/steven-steven/Blog/blob/master/static/blogAssets/creating-an-invoice-app-with-electron-and-go/offlineDemo.gif)
+<img src="https://github.com/steven-steven/Blog/blob/master/static/blogAssets/creating-an-invoice-app-with-electron-and-go/offlineDemo.gif" width="300" />
