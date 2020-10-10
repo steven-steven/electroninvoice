@@ -1,10 +1,11 @@
 <p align="center">
-  <img src="/readme_assets/PHOTO-2020-09-06-09-52-35 3.jpg" width="50" />
+  <img src="/readme_assets/dpLogo.jpg" width="50" />
  </p>
 
 Electron app that powers the DP Invoice APP. See the [Backend](https://github.com/steven-steven/GoInvoice) built in Golang.
 
 This app is created with:
+
 - [Electron React Boilerplate](https://electron-react-boilerplate.js.org/docs/installation)
 - **Firebase Realtime DB** to subscribe to realtime events
 - **Tailwind** as style library
@@ -13,12 +14,13 @@ This app is created with:
 - [react-hook-form](https://react-hook-form.com/) to provide hooks for simple form creation and validations
 
 ## Starting Development
+
 1. import `./app/config.json` file for secrets (firebase configurations and production server)
 2. Start the app in the `dev` environment.
 
-    ```bash
-    yarn dev
-    ```
+   ```bash
+   yarn dev
+   ```
 
 ## Packaging for Production
 
@@ -29,14 +31,19 @@ yarn package
 ```
 
 ## Demo
+
 Add + Edit Invoice
+
 <img src="/readme_assets/create.gif" width="300" />
 
 Add new inventory Item
+
 <img src="/readme_assets/newItem.gif" width="300" />
 
 Download and edit existing invoice PDF
+
 <img src="/readme_assets/editPdf.gif" width="300" />
 
 Error Handling when Offline and works again once the internet is available
+
 <img src="https://github.com/steven-steven/Blog/blob/master/static/blogAssets/creating-an-invoice-app-with-electron-and-go/offlineDemo.gif" width="300" />
