@@ -6,6 +6,7 @@ import { ipcRenderer } from 'electron';
 import { AppThunk, RootState, AppDispatch } from '../../store';
 // eslint-disable-next-line import/no-cycle
 import database from '../../firebase';
+import config from '../../config.json';
 
 export interface Item extends ItemRequest {
   id: string;
@@ -90,7 +91,7 @@ export const initializeItems = (): AppThunk => {
   return (dispatch: AppDispatch) => {
     dispatch(setLoading());
     return axios
-      .get('https://go-invoice-api.herokuapp.com/allItem')
+      .get(`${config.serverProxy}/allItem`)
       .then(({ data }) => {
         return dispatch(loadAllItem(data.Invoices));
       })
@@ -105,7 +106,7 @@ export const addItemCall = (newItem: ItemRequest): AppThunk => {
   return (dispatch: AppDispatch) => {
     dispatch(setLoading());
     return axios
-      .post('https://go-invoice-api.herokuapp.com/item', newItem)
+      .post(`${config.serverProxy}/item`, newItem)
       .then(({ data }) => {
         return dispatch(addItem(data.Item));
       })
@@ -128,9 +129,7 @@ export const deleteItemCall = (id: string): AppThunk => {
         return;
       }
       dispatch(setLoading());
-      const { data } = await axios.delete(
-        `https://go-invoice-api.herokuapp.com/item/${id}`
-      );
+      const { data } = await axios.delete(`${config.serverProxy}/item/${id}`);
       if (data.Success) {
         dispatch(deleteItem(id));
       }
@@ -146,11 +145,9 @@ export const startListening = (): AppThunk => {
     database.ref('invoice/items').on('value', (_itemSnapshot) => {
       // const invoice = invoiceSnapshot.val();
       dispatch(setLoading());
-      return axios
-        .get('https://go-invoice-api.herokuapp.com/allItem')
-        .then(({ data }) => {
-          return dispatch(loadAllItem(data.Items));
-        });
+      return axios.get(`${config.serverProxy}/allItem`).then(({ data }) => {
+        return dispatch(loadAllItem(data.Items));
+      });
     });
   };
 };

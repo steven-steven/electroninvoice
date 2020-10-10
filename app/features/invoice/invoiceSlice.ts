@@ -5,6 +5,7 @@ import { ipcRenderer } from 'electron';
 // eslint-disable-next-line import/no-cycle
 import { AppThunk, RootState, AppDispatch } from '../../store';
 import database, { firebase } from '../../firebase';
+import config from '../../config.json';
 
 export interface InvoiceRequest {
   client: string;
@@ -127,7 +128,7 @@ export const initializeInvoices = (): AppThunk => {
   return (dispatch: AppDispatch) => {
     dispatch(setLoading());
     return axios
-      .get('https://go-invoice-api.herokuapp.com/allInvoice')
+      .get(`${config.serverProxy}/allInvoice`)
       .then(({ data }) => dispatch(loadAllInvoice(data.Invoices)))
       .catch((e) => {
         ipcRenderer.send('showError', `Gagal ng-load invoice: ${e}`);
@@ -140,7 +141,7 @@ export const addInvoiceCall = (newInvoice: InvoiceRequest): AppThunk => {
   return (dispatch: AppDispatch) => {
     dispatch(setLoading());
     return axios
-      .post('https://go-invoice-api.herokuapp.com/invoice', newInvoice)
+      .post(`${config.serverProxy}/invoice`, newInvoice)
       .then(({ data }) => dispatch(addInvoice(data.Invoice)))
       .catch((e) => {
         ipcRenderer.send('showError', `Gagal membuat invoice baru: ${e}`);
@@ -161,7 +162,7 @@ export const deleteInvoiceCall = (id: string): AppThunk => {
       }
       dispatch(setLoading());
       const { data } = await axios.delete(
-        `https://go-invoice-api.herokuapp.com/invoice/${id}`
+        `${config.serverProxy}/invoice/${id}`
       );
       if (data.Success) {
         dispatch(deleteInvoice(id));
@@ -180,7 +181,7 @@ export const updateInvoiceCall = (
   return (dispatch: AppDispatch) => {
     dispatch(setLoading());
     return axios
-      .put(`https://go-invoice-api.herokuapp.com/invoice/${id}`, newInvoice)
+      .put(`${config.serverProxy}/invoice/${id}`, newInvoice)
       .then(({ data }) => dispatch(updateInvoice(data.Invoice)))
       .catch((e) => {
         ipcRenderer.send('showError', `Gagal mengedit: ${e}`);
@@ -205,7 +206,7 @@ export const startListening = (): AppThunk => {
       // const invoice = invoiceSnapshot.val();
       dispatch(setLoading());
       return axios
-        .get('https://go-invoice-api.herokuapp.com/allInvoice')
+        .get(`${config.serverProxy}/allInvoice`)
         .then(({ data }) => dispatch(loadAllInvoice(data.Invoices)));
     });
   };
