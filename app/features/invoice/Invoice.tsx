@@ -5,20 +5,15 @@ import { Link } from 'react-router-dom';
 import routes from '../../constants/routes.json';
 import MyTable from '../../components/MyTable';
 import {
-  initializeInvoices,
-  addInvoiceCall,
   deleteInvoiceCall,
-  updateInvoiceCall,
-  selectInvoice,
   getInvoice,
   getStatus,
   Invoice,
-  startListening,
   getIsFetched,
-  saveInvoice,
+  downloadInvoice,
   status as invoiceStatus,
 } from './invoiceSlice';
-import { startListening as startListeningItems } from '../daftarBarang/daftarBarangSlice';
+import { startListening } from '../connection/connectionSlice';
 
 export default function InvoicePage() {
   const invoices = useSelector(getInvoice);
@@ -31,7 +26,6 @@ export default function InvoicePage() {
     if (status === invoiceStatus.IDLE && !isFetched) {
       // dispatch(initializeInvoices()); Unneeded since startListening is triggered in the beginning
       dispatch(startListening());
-      dispatch(startListeningItems());
     }
   }, [dispatch, isFetched, status]);
 
@@ -78,7 +72,7 @@ export default function InvoicePage() {
           return (
             <button
               type="button"
-              onClick={() => dispatch(saveInvoice(row.values.idCol))}
+              onClick={() => dispatch(downloadInvoice(row.values.idCol))}
             >
               <i className="far fa-file-pdf fa-md" />
             </button>

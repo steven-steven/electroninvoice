@@ -4,7 +4,7 @@ import axios from 'axios';
 import { ipcRenderer } from 'electron';
 // eslint-disable-next-line import/no-cycle
 import { AppThunk, RootState, AppDispatch } from '../../store';
-import database, { firebase } from '../../firebase';
+import database from '../../firebase';
 import config from '../../config.json';
 
 export interface InvoiceRequest {
@@ -140,6 +140,10 @@ export const initializeInvoices = (): AppThunk => {
 export const addInvoiceCall = (newInvoice: InvoiceRequest): AppThunk => {
   return (dispatch: AppDispatch) => {
     dispatch(setLoading());
+    if (!getState().connection.connected) {
+      // ipcRenderer send persist data to local store
+      // return if succeed
+    }
     return axios
       .post(`${config.serverProxy}/invoice`, newInvoice)
       .then(({ data }) => dispatch(addInvoice(data.Invoice)))
@@ -178,8 +182,12 @@ export const updateInvoiceCall = (
   id: string,
   newInvoice: InvoiceRequest
 ): AppThunk => {
-  return (dispatch: AppDispatch) => {
+  return (dispatch: AppDispatch, getState: () => RootState) => {
     dispatch(setLoading());
+    if (!getState().connection.connected) {
+      // ipcRenderer send persist data to local store
+      // return if succeed
+    }
     return axios
       .put(`${config.serverProxy}/invoice/${id}`, newInvoice)
       .then(({ data }) => dispatch(updateInvoice(data.Invoice)))
@@ -190,11 +198,11 @@ export const updateInvoiceCall = (
   };
 };
 
-export const saveInvoice = (id: string): AppThunk => {
+export const downloadInvoice = (id: string): AppThunk => {
   return (dispatch: AppDispatch, getState: () => RootState) => {
     const invoiceState = getState().invoice;
     if (invoiceState.invoices) {
-      return ipcRenderer.send('save-invoice', invoiceState.invoices[id]);
+      return ipcRenderer.send('download-invoice', invoiceState.invoices[id]);
     }
     return false;
   };
@@ -209,6 +217,12 @@ export const startListening = (): AppThunk => {
         .get(`${config.serverProxy}/allInvoice`)
         .then(({ data }) => dispatch(loadAllInvoice(data.Invoices)));
     });
+  };
+};
+
+export const stopListening = (): AppThunk => {
+  return (dispatch: AppDispatch, getState: () => RootState) => {
+    database.ref('invoice/documents').off();
   };
 };
 

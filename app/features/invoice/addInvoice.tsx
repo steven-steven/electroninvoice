@@ -7,20 +7,14 @@ import MomentTz from 'moment-timezone';
 import routes from '../../constants/routes.json';
 import EditableTable from '../../components/EditableTable';
 import {
-  initializeInvoices,
   addInvoiceCall,
-  deleteInvoiceCall,
   updateInvoiceCall,
-  selectInvoice,
-  getInvoice,
   getStatus as getInvoiceStatus,
   InvoiceRequest,
-  getIsFetched,
-  saveInvoice,
+  downloadInvoice,
   status as invoiceStatus,
 } from './invoiceSlice';
 import {
-  Item,
   getStatus as getItemStatus,
   getItem,
   status as itemStatus,
@@ -677,7 +671,7 @@ export default function InvoicePage() {
                 {invoiceToEdit && (
                   <button
                     type="button"
-                    onClick={() => dispatch(saveInvoice(invoiceToEdit.id))}
+                    onClick={() => dispatch(downloadInvoice(invoiceToEdit.id))}
                     className="block w-full mt-3 bg-black hover:bg-blue-600 text-white font-semibold hover:text-white py-2 px-4 border border-black hover:border-transparent rounded"
                   >
                     Download PDF

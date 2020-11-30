@@ -152,6 +152,12 @@ export const startListening = (): AppThunk => {
   };
 };
 
+export const stopListening = (): AppThunk => {
+  return (dispatch: AppDispatch, getState: () => RootState) => {
+    database.ref('invoice/items').off();
+  };
+};
+
 export const getItem = (state: RootState) => state.daftarBarang.items;
 export const getIsFetched = (state: RootState) => state.daftarBarang.isFetched;
 export const getStatus = (state: RootState) => state.daftarBarang.status;

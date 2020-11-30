@@ -184,7 +184,7 @@ function savePdf(win: BrowserWindow, pdfData: Buffer, invoiceId: string) {
   });
 }
 
-ipcMain.on('save-invoice', (_event, invoice: Invoice) => {
+ipcMain.on('download-invoice', (_event, invoice: Invoice) => {
   console.log(invoice);
   if (invoice.client_address) {
     const addressLine1 = [

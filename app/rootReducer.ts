@@ -5,11 +5,14 @@ import { History } from 'history';
 import invoiceReducer from './features/invoice/invoiceSlice';
 // eslint-disable-next-line import/no-cycle
 import daftarBarangReducer from './features/daftarBarang/daftarBarangSlice';
+// eslint-disable-next-line import/no-cycle
+import connectionReducer from './features/connection/connectionSlice';
 
 export default function createRootReducer(history: History) {
   return combineReducers({
     router: connectRouter(history),
     invoice: invoiceReducer,
     daftarBarang: daftarBarangReducer,
+    connection: connectionReducer,
   });
 }
