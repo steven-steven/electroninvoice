@@ -64,7 +64,7 @@ export default function InvoicePage() {
       },
       {
         // Make an expander cell
-        Header: 'Unduh',
+        Header: 'Unduh Invoice',
         id: 'download',
         collapse: true,
         // eslint-disable-next-line react/display-name
@@ -73,6 +73,23 @@ export default function InvoicePage() {
             <button
               type="button"
               onClick={() => dispatch(downloadInvoice(row.values.idCol))}
+            >
+              <i className="far fa-file-pdf fa-md" />
+            </button>
+          );
+        },
+      },
+      {
+        // Make an expander cell
+        Header: 'Unduh Kwitansi',
+        id: 'kwitansi',
+        collapse: true,
+        // eslint-disable-next-line react/display-name
+        Cell: ({ row }: CellProps<Invoice>) => {
+          return (
+            <button
+              type="button"
+              onClick={() => dispatch(downloadInvoice(row.values.idCol, true))}
             >
               <i className="far fa-file-pdf fa-md" />
             </button>
@@ -114,7 +131,7 @@ export default function InvoicePage() {
         },
       },
     ],
-    []
+    [dispatch]
   );
 
   return (

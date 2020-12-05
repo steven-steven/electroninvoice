@@ -154,10 +154,15 @@ function formatPrice(price: number) {
   )},${splitted[1].padEnd(3, '0')}`;
 }
 
-function savePdf(win: BrowserWindow, pdfData: Buffer, invoiceId: string) {
+function savePdf(
+  win: BrowserWindow,
+  pdfData: Buffer,
+  invoiceId: string,
+  pdfType: string
+) {
   const options = {
     title: 'Save file',
-    defaultPath: `${app.getPath('downloads')}/invoice_${invoiceId}`,
+    defaultPath: `${app.getPath('downloads')}/${pdfType}_${invoiceId}`,
     buttonLabel: 'Save',
 
     filters: [
@@ -184,87 +189,91 @@ function savePdf(win: BrowserWindow, pdfData: Buffer, invoiceId: string) {
   });
 }
 
-ipcMain.on('download-invoice', (_event, invoice: Invoice) => {
-  console.log(invoice);
-  if (invoice.client_address) {
-    const addressLine1 = [
-      invoice.client_address.address,
-      invoice.client_address.postal_code,
-    ]
-      .filter(Boolean)
-      .join(', ');
+ipcMain.on(
+  'download-invoice',
+  (_event, invoice: Invoice, isKwitansi?: boolean) => {
+    const pdfType = isKwitansi ? 'kwitansi' : 'invoice';
+    if (invoice.client_address) {
+      const addressLine1 = [
+        invoice.client_address.address,
+        invoice.client_address.postal_code,
+      ]
+        .filter(Boolean)
+        .join(', ');
 
-    const addressLine2 = [
-      invoice.client_address.city,
-      invoice.client_address.state,
-      invoice.client_address.country,
-    ]
-      .filter(Boolean)
-      .join(', ');
+      const addressLine2 = [
+        invoice.client_address.city,
+        invoice.client_address.state,
+        invoice.client_address.country,
+      ]
+        .filter(Boolean)
+        .join(', ');
 
-    ejse.data('addressLine1', addressLine1);
-    ejse.data('addressLine2', addressLine2);
-  }
-  ejse.data('catatanInvoice', invoice.catatanInvoice);
-  ejse.data('catatanKwitansi', invoice.catatanKwitansi);
-
-  ejse.data('client', invoice.client);
-  ejse.data(
-    'items',
-    invoice.items.map((item) => {
-      const isUnitMetric = item.metricQuantity && item.metricQuantity > 0;
-      return {
-        ...item,
-        amount: formatPrice(item.amount),
-        rate: formatPrice(item.rate),
-        quantity: isUnitMetric
-          ? formatPrice(item.metricQuantity / 1000.0)
-          : item.quantity,
-        isMetric: isUnitMetric,
-      };
-    })
-  );
-  ejse.data('date', invoice.date);
-  ejse.data('taxPercent', invoice.tax);
-  ejse.data(
-    'tax',
-    formatPrice(Math.round((invoice.tax / 100) * invoice.subtotal))
-  );
-  ejse.data('total', formatPrice(invoice.total));
-  ejse.data(
-    'terbilang',
-    angkaTerbilang(invoice.total.toString()).toUpperCase()
-  );
-  ejse.data('subtotal', formatPrice(invoice.subtotal));
-  ejse.data('id', invoice.id);
-
-  ejse.data('iconPath', `file://${__dirname}/icon.png`);
-
-  pdfWindow = new BrowserWindow({
-    show: false,
-  });
-  pdfWindow.loadURL(`file://${__dirname}/invoiceTemplate.ejs`);
-  log.info('LOAD');
-  log.info(`file://${__dirname}/invoiceTemplate.ejs`);
-
-  pdfWindow.webContents.on('did-finish-load', () => {
-    if (pdfWindow) {
-      pdfWindow.webContents
-        .printToPDF(pdfSettings())
-        .then((data) => {
-          if (mainWindow) return savePdf(mainWindow, data, invoice.id);
-          return '';
-        })
-        .catch((error) => {
-          console.log(error);
-          log.info(error);
-        });
+      ejse.data('addressLine1', addressLine1);
+      ejse.data('addressLine2', addressLine2);
     }
-  });
+    ejse.data('catatanInvoice', invoice.catatanInvoice);
+    ejse.data('catatanKwitansi', invoice.catatanKwitansi);
 
-  // if (mainWindow == null) return;
-  // InvoiceRenderer.save(mainWindow, invoice);
-});
+    ejse.data('client', invoice.client);
+    ejse.data(
+      'items',
+      invoice.items.map((item) => {
+        const isUnitMetric = item.metricQuantity && item.metricQuantity > 0;
+        return {
+          ...item,
+          amount: formatPrice(item.amount),
+          rate: formatPrice(item.rate),
+          quantity: isUnitMetric
+            ? formatPrice(item.metricQuantity / 1000.0)
+            : item.quantity,
+          isMetric: isUnitMetric,
+        };
+      })
+    );
+    ejse.data('date', invoice.date);
+    ejse.data('taxPercent', invoice.tax);
+    ejse.data(
+      'tax',
+      formatPrice(Math.round((invoice.tax / 100) * invoice.subtotal))
+    );
+    ejse.data('total', formatPrice(invoice.total));
+    ejse.data(
+      'terbilang',
+      angkaTerbilang(invoice.total.toString()).toUpperCase()
+    );
+    ejse.data('subtotal', formatPrice(invoice.subtotal));
+    ejse.data('id', invoice.id);
+
+    ejse.data('iconPath', `file://${__dirname}/icon.png`);
+
+    pdfWindow = new BrowserWindow({
+      show: false,
+    });
+    pdfWindow.loadURL(`file://${__dirname}/${pdfType}Template.ejs`);
+    log.info('LOAD');
+    log.info(`file://${__dirname}/${pdfType}Template.ejs`);
+
+    pdfWindow.webContents.on('did-finish-load', () => {
+      if (pdfWindow) {
+        pdfWindow.webContents
+          .printToPDF(pdfSettings())
+          .then((data) => {
+            if (mainWindow)
+              return savePdf(mainWindow, data, invoice.id, pdfType);
+            return '';
+          })
+          .catch((error) => {
+            console.log(error);
+            log.info(error);
+          });
+      }
+    });
+
+    // if (mainWindow == null) return;
+    // InvoiceRenderer.save(mainWindow, invoice);
+  }
+);
 
 ipcMain.handle(
   'confirmDelete',
@@ -280,8 +289,6 @@ ipcMain.handle(
 
     if (!mainWindow)
       return Promise.reject(new Error('Main Window is not open'));
-
-    console.log('Open dialog');
 
     try {
       const { response } = await dialog.showMessageBox(mainWindow, options);

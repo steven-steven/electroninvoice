@@ -138,7 +138,7 @@ export const initializeInvoices = (): AppThunk => {
 };
 
 export const addInvoiceCall = (newInvoice: InvoiceRequest): AppThunk => {
-  return (dispatch: AppDispatch) => {
+  return (dispatch: AppDispatch, getState: () => RootState) => {
     dispatch(setLoading());
     if (!getState().connection.connected) {
       // ipcRenderer send persist data to local store
@@ -198,19 +198,23 @@ export const updateInvoiceCall = (
   };
 };
 
-export const downloadInvoice = (id: string): AppThunk => {
-  return (dispatch: AppDispatch, getState: () => RootState) => {
+export const downloadInvoice = (id: string, isKwitansi?: boolean): AppThunk => {
+  return (_dispatch: AppDispatch, getState: () => RootState) => {
     const invoiceState = getState().invoice;
     if (invoiceState.invoices) {
-      return ipcRenderer.send('download-invoice', invoiceState.invoices[id]);
+      return ipcRenderer.send(
+        'download-invoice',
+        invoiceState.invoices[id],
+        isKwitansi
+      );
     }
     return false;
   };
 };
 
 export const startListening = (): AppThunk => {
-  return (dispatch: AppDispatch, getState: () => RootState) => {
-    database.ref('invoice/documents').on('value', (invoiceSnapshot) => {
+  return (dispatch: AppDispatch) => {
+    database.ref('invoice/documents').on('value', () => {
       // const invoice = invoiceSnapshot.val();
       dispatch(setLoading());
       return axios
@@ -221,7 +225,7 @@ export const startListening = (): AppThunk => {
 };
 
 export const stopListening = (): AppThunk => {
-  return (dispatch: AppDispatch, getState: () => RootState) => {
+  return () => {
     database.ref('invoice/documents').off();
   };
 };

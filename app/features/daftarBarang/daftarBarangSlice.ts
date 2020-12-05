@@ -141,8 +141,8 @@ export const deleteItemCall = (id: string): AppThunk => {
 };
 
 export const startListening = (): AppThunk => {
-  return (dispatch: AppDispatch, getState: () => RootState) => {
-    database.ref('invoice/items').on('value', (_itemSnapshot) => {
+  return (dispatch: AppDispatch) => {
+    database.ref('invoice/items').on('value', () => {
       // const invoice = invoiceSnapshot.val();
       dispatch(setLoading());
       return axios.get(`${config.serverProxy}/allItem`).then(({ data }) => {
@@ -153,7 +153,7 @@ export const startListening = (): AppThunk => {
 };
 
 export const stopListening = (): AppThunk => {
-  return (dispatch: AppDispatch, getState: () => RootState) => {
+  return () => {
     database.ref('invoice/items').off();
   };
 };

@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
-import { AppThunk, RootState, AppDispatch } from '../../store';
+import { AppThunk, RootState } from '../../store';
 // eslint-disable-next-line import/no-cycle
 import database from '../../firebase';
 // eslint-disable-next-line import/no-cycle
@@ -40,7 +40,7 @@ export const { setConnected, setDisconnected } = connectionSlice.actions;
 export default connectionSlice.reducer;
 
 export const startListening = (): AppThunk => {
-  return (dispatch, getState: () => RootState) => {
+  return (dispatch) => {
     database.ref('.info/connected').on('value', (snap) => {
       if (snap.val() === true) {
         // Internet Connected

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { CellProps } from 'react-table';
@@ -29,7 +29,6 @@ export default function InvoicePage() {
     register: itemFormRegister,
     handleSubmit: itemFormHandleSubmit,
     errors: itemFormError,
-    watch: itemWatch,
   } = useForm();
 
   const submitItem = (data: TableCells) => {
@@ -85,7 +84,7 @@ export default function InvoicePage() {
         },
       },
     ],
-    []
+    [dispatch]
   );
 
   return (
@@ -110,7 +109,7 @@ export default function InvoicePage() {
           <form onSubmit={itemFormHandleSubmit(submitItem)}>
             <div className="formBox text-left">
               <label htmlFor="itemName">
-                Nama Barang/Jasa
+                Nama Barang/Jasa *
                 <input
                   id="itemName"
                   name="nameCol"
@@ -146,7 +145,7 @@ export default function InvoicePage() {
                   id="deskripsi"
                   name="descriptionCol"
                   rows={1}
-                  ref={itemFormRegister({ required: true })}
+                  ref={itemFormRegister()}
                   className={`w-full mb-8 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
                     itemFormError.descriptionCol ? 'border-red-500' : ''
                   }`}

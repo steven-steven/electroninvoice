@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { useLocation, useHistory } from 'react-router-dom';
@@ -675,6 +675,16 @@ export default function InvoicePage() {
                     className="block w-full mt-3 bg-black hover:bg-blue-600 text-white font-semibold hover:text-white py-2 px-4 border border-black hover:border-transparent rounded"
                   >
                     Download PDF
+                  </button>
+                )}
+                {invoiceToEdit && (
+                  <button
+                    type="button"
+                    // eslint-disable-next-line prettier/prettier
+                    onClick={() => dispatch(downloadInvoice(invoiceToEdit.id, true))}
+                    className="block w-full mt-3 bg-black hover:bg-blue-600 text-white font-semibold hover:text-white py-2 px-4 border border-black hover:border-transparent rounded"
+                  >
+                    Download Kwitansi
                   </button>
                 )}
               </div>
