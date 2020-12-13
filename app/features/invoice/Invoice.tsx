@@ -11,16 +11,25 @@ import {
   Invoice,
   getIsFetched,
   downloadInvoice,
+  initializeOfflineInvoices,
   status as invoiceStatus,
 } from './invoiceSlice';
-import { startListening } from '../connection/connectionSlice';
+import { startListening, getIsConnected } from '../connection/connectionSlice';
 
 export default function InvoicePage() {
   const invoices = useSelector(getInvoice);
   const status = useSelector(getStatus);
   const isFetched = useSelector(getIsFetched);
+  const isConnected = useSelector(getIsConnected);
   const dispatch = useDispatch();
   // const selectedId = useSelector(getSelectedId);
+
+  useEffect(() => {
+    // get data from local (if first load has no connection)
+    if (status === invoiceStatus.IDLE && !isFetched && !isConnected) {
+      dispatch(initializeOfflineInvoices());
+    }
+  }, [dispatch, isFetched, status, isConnected]);
 
   useEffect(() => {
     if (status === invoiceStatus.IDLE && !isFetched) {

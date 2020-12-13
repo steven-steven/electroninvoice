@@ -7,6 +7,7 @@ import database from '../../firebase';
 import {
   startListening as startListeningInvoices,
   stopListening as stopListeningInvoices,
+  syncDirtyData as syncInvoices,
 } from '../invoice/invoiceSlice';
 // eslint-disable-next-line import/no-cycle
 import {
@@ -40,9 +41,11 @@ export const { setConnected, setDisconnected } = connectionSlice.actions;
 export default connectionSlice.reducer;
 
 export const startListening = (): AppThunk => {
-  return (dispatch) => {
+  return (dispatch: any) => {
     database.ref('.info/connected').on('value', (snap) => {
       if (snap.val() === true) {
+        // sync dirty cache when it comes back up
+        dispatch(syncInvoices());
         // Internet Connected
         dispatch(setConnected());
         dispatch(startListeningInvoices());
@@ -57,4 +60,4 @@ export const startListening = (): AppThunk => {
   };
 };
 
-export const isConnected = (state: RootState) => state.connection.connected;
+export const getIsConnected = (state: RootState) => state.connection.connected;

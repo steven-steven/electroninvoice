@@ -22,7 +22,8 @@ import angkaTerbilang from '@develoka/angka-terbilang-js';
 import MenuBuilder from './menu';
 import { Invoice } from './features/invoice/invoiceSlice';
 
-// import InvoiceRenderer from './renderer';
+require('./providers/invoiceStorage');
+require('./providers/itemStorage');
 
 export default class AppUpdater {
   constructor() {
