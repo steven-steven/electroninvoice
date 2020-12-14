@@ -258,7 +258,7 @@ export default function InvoicePage() {
   );
 
   const calculateTotal = (total: number, tax: number) =>
-    Math.round(total + (tax / 100) * total);
+    Math.round(total + (tax / 100) * total).toLocaleString('id');
 
   let tax = invoiceWatch('tax');
   if (tax == null) tax = 0;

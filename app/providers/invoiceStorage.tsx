@@ -76,7 +76,7 @@ const store = new ElectronStore({ name: 'invoice', schema });
 ipcMain.handle(
   'invoices_getAll',
   async (): Promise<Invoices> => {
-    console.log('get all local invoice');
+    // console.log('get all local invoice');
     const invoices = {} as Invoices;
     const flaggedInvoices: { [k: string]: FlaggedInvoice } = store.get(
       'invoices',
@@ -97,7 +97,7 @@ ipcMain.handle(
 ipcMain.handle(
   'invoices_getUnsavedChanges',
   async (): Promise<UnsavedChanges> => {
-    console.log('get all unsaved changes');
+    // console.log('get all unsaved changes');
     // returns [invoices_to_delete, invoices_to_add]
     // Rule: There shouldn't be an invoice markedToDelete and unsaved
     const allInvoice: FlaggedInvoice[] = Object.values(
@@ -133,9 +133,22 @@ ipcMain.handle(
   }
 );
 
+let removeListener = () => {};
+ipcMain.on('syncStateListener', (event) => {
+  removeListener = store.onDidChange('isSynced', (newChange: boolean) => {
+    event.reply('syncStateListener', newChange);
+    // console.log("changed");
+  });
+});
+
+ipcMain.on('removeSyncStateListener', (_event) => {
+  // console.log('remove Listener');
+  removeListener();
+});
+
 // add and put (dirty or clean)
 ipcMain.on('invoices_add', (_event, invoice: Invoice, synced: boolean) => {
-  console.log('add/put invoice');
+  // console.log('add/put invoice');
   if (!synced) store.set(`isSynced`, false);
   const flaggedInvoice: FlaggedInvoice = {
     ...invoice,
@@ -147,7 +160,7 @@ ipcMain.on('invoices_add', (_event, invoice: Invoice, synced: boolean) => {
 
 // refresh entire data (clean)
 ipcMain.on('invoices_refreshNew', (_event, invoices: Invoices) => {
-  console.log('refresh new data');
+  // console.log('refresh new data');
   store.set(`isSynced`, true);
   const flaggedInvoices = {} as { [k: string]: FlaggedInvoice };
   Object.keys(invoices).forEach((key) => {
@@ -162,7 +175,7 @@ ipcMain.on('invoices_refreshNew', (_event, invoices: Invoices) => {
 
 // delete (dirty or clean)
 ipcMain.on('invoices_delete', (_event, id: string, synced: boolean) => {
-  console.log('delete invoice');
+  // console.log('delete invoice');
   // If saved just mark to delete it
   if (!synced && store.get(`invoices.${id}`).saved) {
     store.set(`isSynced`, false);

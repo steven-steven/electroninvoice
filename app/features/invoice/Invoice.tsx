@@ -12,6 +12,7 @@ import {
   getIsFetched,
   downloadInvoice,
   initializeOfflineInvoices,
+  getIsSynced,
   status as invoiceStatus,
 } from './invoiceSlice';
 import { startListening, getIsConnected } from '../connection/connectionSlice';
@@ -21,6 +22,7 @@ export default function InvoicePage() {
   const status = useSelector(getStatus);
   const isFetched = useSelector(getIsFetched);
   const isConnected = useSelector(getIsConnected);
+  const isSynced = useSelector(getIsSynced);
   const dispatch = useDispatch();
   // const selectedId = useSelector(getSelectedId);
 
@@ -46,7 +48,7 @@ export default function InvoicePage() {
           invoiceNo: invoice.invoice_no,
           clientCol: invoice.client,
           dateCol: invoice.date,
-          totalCol: invoice.total,
+          totalCol: invoice.total.toLocaleString('id'),
         };
       }),
     [invoices]
@@ -146,7 +148,19 @@ export default function InvoicePage() {
 
   return (
     <div>
-      <div className="mt-8 flex items-center justify-center">
+      <div className="ml-3 text-gray-700 rounded-lg p-3">
+        <p className="text-xs">
+          Status:&nbsp;
+          {isSynced
+            ? '✅ tersimpan'
+            : '❌ sedang mencari koneksi internet untuk sinkronisasi data... (sementara ini, data sudah tersimpan dalam sistem)'}
+        </p>
+        <p className="text-xs">
+          Internet:&nbsp;
+          {isConnected ? '✅ terhubung' : '❌ terputus'}
+        </p>
+      </div>
+      <div className="flex flex-col items-center justify-center">
         {status === invoiceStatus.LOADING ? (
           <div className="text-center">
             <i className="fa fa-spinner fa-pulse fa-3x fa-fw" />

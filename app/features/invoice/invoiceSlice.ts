@@ -59,6 +59,7 @@ const invoiceSlice = createSlice({
     invoices: {} as Invoices,
     status: status.IDLE,
     isFetched: false,
+    isSynced: false,
   },
   reducers: {
     addInvoice: (state, invoice: PayloadAction<Invoice>) => {
@@ -115,6 +116,12 @@ const invoiceSlice = createSlice({
         status: status.IDLE,
       };
     },
+    setIsSynced: (state, isSynced: PayloadAction<boolean>) => {
+      return {
+        ...state,
+        isSynced: isSynced.payload,
+      };
+    },
   },
 });
 
@@ -126,6 +133,7 @@ export const {
   selectInvoice,
   setLoading,
   setIdle,
+  setIsSynced,
 } = invoiceSlice.actions;
 
 /* POST
@@ -325,6 +333,21 @@ export const startListening = (): AppThunk => {
   };
 };
 
+export const subscribeToSyncState = (): AppThunk => {
+  return (dispatch: AppDispatch) => {
+    ipcRenderer.on('syncStateListener', (_event, isSynced: boolean) => {
+      dispatch(setIsSynced(isSynced));
+    });
+    ipcRenderer.send('syncStateListener');
+  };
+};
+
+export const unsubscribeToSyncState = (): AppThunk => {
+  return () => {
+    ipcRenderer.send('removeSyncStateListener');
+  };
+};
+
 /*
  *  Clean up dirty (added/updated/deleted) data in local electron-store
  */
@@ -387,3 +410,4 @@ export const getStatus = (state: RootState) => state.invoice.status;
 export const getIsFetched = (state: RootState) => state.invoice.isFetched;
 export const getSelectedId = (state: RootState) =>
   state.invoice.selectedInvoice;
+export const getIsSynced = (state: RootState) => state.invoice.isSynced;
