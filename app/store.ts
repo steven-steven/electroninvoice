@@ -11,7 +11,7 @@ const rootReducer = createRootReducer(history);
 export type RootState = ReturnType<typeof rootReducer>;
 
 const router = routerMiddleware(history);
-const middleware = [...getDefaultMiddleware(), router];
+const middleware = [router, ...getDefaultMiddleware<RootState>()] as const;
 
 const excludeLoggerEnvs = ['test', 'production'];
 const shouldIncludeLogger = !excludeLoggerEnvs.includes(
@@ -47,4 +47,9 @@ export const store = configuredStore();
 export type AppDispatch = typeof store.dispatch;
 
 export type Store = ReturnType<typeof configuredStore>;
-export type AppThunk = ThunkAction<void, RootState, unknown, Action<string>>;
+export type AppThunk<R = void> = ThunkAction<
+  R,
+  RootState,
+  unknown,
+  Action<string>
+>;
