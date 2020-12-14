@@ -42,7 +42,8 @@ export default function InvoicePage() {
     () =>
       Object.values(invoices).map((invoice) => {
         return {
-          idCol: invoice.id,
+          id: invoice.id,
+          invoiceNo: invoice.invoice_no,
           clientCol: invoice.client,
           dateCol: invoice.date,
           totalCol: invoice.total,
@@ -55,7 +56,7 @@ export default function InvoicePage() {
     () => [
       {
         Header: 'No. Invoice',
-        accessor: 'idCol',
+        accessor: 'invoiceNo',
       },
       {
         Header: 'Nama Customer',
@@ -81,7 +82,7 @@ export default function InvoicePage() {
           return (
             <button
               type="button"
-              onClick={() => dispatch(downloadInvoice(row.values.idCol))}
+              onClick={() => dispatch(downloadInvoice(row.original.id))}
             >
               <i className="far fa-file-pdf fa-md" />
             </button>
@@ -98,7 +99,7 @@ export default function InvoicePage() {
           return (
             <button
               type="button"
-              onClick={() => dispatch(downloadInvoice(row.values.idCol, true))}
+              onClick={() => dispatch(downloadInvoice(row.original.id, true))}
             >
               <i className="far fa-file-pdf fa-md" />
             </button>
@@ -115,7 +116,7 @@ export default function InvoicePage() {
             <Link
               to={{
                 pathname: routes.ADDINVOICE,
-                search: `?id=${row.values.idCol}`,
+                search: `?id=${row.original.id}`,
               }}
             >
               <i className="far fa-edit fa-md" />
@@ -132,7 +133,7 @@ export default function InvoicePage() {
           return (
             <button
               type="button"
-              onClick={() => dispatch(deleteInvoiceCall(row.values.idCol))}
+              onClick={() => dispatch(deleteInvoiceCall(row.original.id))}
             >
               <i className="far fa-trash-alt fa-md" />
             </button>

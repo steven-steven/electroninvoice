@@ -244,7 +244,7 @@ ipcMain.on(
       angkaTerbilang(invoice.total.toString()).toUpperCase()
     );
     ejse.data('subtotal', formatPrice(invoice.subtotal));
-    ejse.data('id', invoice.id);
+    ejse.data('id', invoice.invoice_no);
 
     ejse.data('iconPath', `file://${__dirname}/icon.png`);
 

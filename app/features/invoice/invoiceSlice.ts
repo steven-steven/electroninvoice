@@ -11,7 +11,7 @@ import config from '../../config.json';
 import { UnsavedChanges } from '../../providers/invoiceStorage';
 
 export interface InvoiceRequest {
-  invoiceNo: string;
+  invoice_no: string;
   client: string;
   client_address?: {
     address?: string;
@@ -140,7 +140,7 @@ const prepareMockPostPayload = (invRequest: InvoiceRequest): Invoice => {
   const total = Math.round(subtotal + (invRequest.tax / 100) * subtotal);
   return {
     ...invRequest,
-    id: `temp_${uuidv4()}`,
+    id: `${uuidv4()}`,
     createdAt: invRequest.date,
     total,
     subtotal,
@@ -192,6 +192,21 @@ export const initializeOfflineInvoices = (): AppThunk => {
   };
 };
 
+export const getInvoiceNumber = (
+  dateKey: string
+): AppThunk<Promise<number>> => {
+  return async () => ipcRenderer.invoke('invoices_getNextInvoiceNo', dateKey);
+};
+
+export const setInvoiceNumber = (
+  dateKey: string,
+  newInvoiceNo: number
+): AppThunk => {
+  return async () => {
+    ipcRenderer.send('invoices_setNextInvoiceNo', dateKey, newInvoiceNo);
+  };
+};
+
 export const addInvoiceCall = (newInvoice: InvoiceRequest): AppThunk => {
   return async (dispatch: AppDispatch, getState: () => RootState) => {
     dispatch(setLoading());
@@ -204,7 +219,13 @@ export const addInvoiceCall = (newInvoice: InvoiceRequest): AppThunk => {
     try {
       const res = await axios.post(`${config.serverProxy}/invoice`, newInvoice);
       if (res.data && res.status === 200) {
+        const dateKey = res.data.Invoice.invoice_no.substring(0, 2);
+        const invoiceNumber = parseInt(
+          res.data.Invoice.invoice_no.split('-')[1],
+          10
+        );
         dispatch(addInvoice(res.data.Invoice));
+        dispatch(setInvoiceNumber(dateKey, invoiceNumber + 1));
         ipcRenderer.send('invoices_add', res.data.Invoice, true);
       } else {
         throw new Error(`${res.status}: ${res}`);

@@ -22,7 +22,7 @@ export default function MyTable({
         // @ts-ignore
         sortBy: [
           {
-            id: 'idCol',
+            id: 'invoiceNo',
             desc: true,
           },
         ],

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { useLocation, useHistory } from 'react-router-dom';
@@ -8,6 +8,7 @@ import routes from '../../constants/routes.json';
 import EditableTable from '../../components/EditableTable';
 import {
   addInvoiceCall,
+  getInvoiceNumber,
   updateInvoiceCall,
   getStatus as getInvoiceStatus,
   InvoiceRequest,
@@ -20,7 +21,7 @@ import {
   status as itemStatus,
 } from '../daftarBarang/daftarBarangSlice';
 
-import { RootState } from '../../store';
+import { AppDispatch, RootState } from '../../store';
 
 interface LeftItemForm {
   transaksi: string;
@@ -55,7 +56,7 @@ export default function InvoicePage() {
   const currInvoiceStatus = useSelector(getInvoiceStatus);
   const currItemStatus = useSelector(getItemStatus);
   const items = useSelector(getItem);
-  const dispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const history = useHistory();
 
   const itemList = React.useMemo(
@@ -102,6 +103,7 @@ export default function InvoicePage() {
   const [isUnitMetric, setIsUnitMetric] = useState<boolean | null>(null); // react-form-hook watcher doesn't seem to work for select
   const [toggleAccordion, setToggleAccordion] = useState(false);
   const [skipPageReset, setSkipPageReset] = useState(false);
+  const [invoiceNo, setInvoiceNo] = useState<string>('');
 
   // form data
   const {
@@ -116,6 +118,23 @@ export default function InvoicePage() {
     errors: invoiceFormError,
     watch: invoiceWatch,
   } = useForm();
+  const watchedDate = invoiceWatch('date');
+
+  useEffect(() => {
+    if (invoiceToEdit) {
+      setInvoiceNo(invoiceToEdit.invoice_no);
+      return;
+    }
+    // Using an IIFE
+    (async function anyNameFunction() {
+      const newInvoiceNumber: number = await dispatch(
+        getInvoiceNumber(Moment(watchedDate).format('YY'))
+      );
+      const paddedNo = String(newInvoiceNumber).padStart(5, '0');
+      const newInvoiceNo = `${Moment(watchedDate).format('YYMM')}-${paddedNo}`;
+      setInvoiceNo(newInvoiceNo);
+    })();
+  }, [watchedDate, invoiceToEdit, dispatch]);
 
   const addToRowData = (data: LeftItemForm) => {
     const chosenItem = items[data.transaksi];
@@ -136,8 +155,9 @@ export default function InvoicePage() {
     setSelectedTransaction('');
   };
 
-  const submitInvoice = (data: RightInvoiceForm) => {
-    const newInvoice: InvoiceRequest = {
+  const submitInvoice = async (data: RightInvoiceForm) => {
+    const newInvoice = {
+      invoice_no: invoiceNo,
       client: data.clientName,
       client_address: {
         address: data.addr_jln,
@@ -168,10 +188,10 @@ export default function InvoicePage() {
 
     if (invoiceToEdit != null) {
       dispatch(updateInvoiceCall(invoiceToEdit.id, newInvoice));
-      history.push(routes.INVOICE);
     } else {
       dispatch(addInvoiceCall(newInvoice));
     }
+    history.push(routes.INVOICE);
   };
 
   // When our cell renderer calls updateMyData, we'll use
@@ -421,7 +441,7 @@ export default function InvoicePage() {
                 <div className="text-2xl mb-6 mt-4">
                   {invoiceToEdit == null
                     ? 'Invoice Baru'
-                    : `Edit invoice #${invoiceToEdit.id}`}
+                    : `Edit invoice #${invoiceToEdit.invoice_no}`}
                 </div>
                 <div className="formBox text-left">
                   <label htmlFor="clientName">
@@ -458,6 +478,26 @@ export default function InvoicePage() {
                       placeholder="-"
                       className={`w-full mb-8 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
                         invoiceFormError.date ? 'border-red-500' : ''
+                      }`}
+                    />
+                  </label>
+                  <label htmlFor="date">
+                    Nomor Invoice *
+                    <input
+                      id="invoiceNo"
+                      name="invoiceNo"
+                      type="text"
+                      value={invoiceNo}
+                      onChange={(e) => setInvoiceNo(e.target.value)}
+                      ref={invoiceFormRegister({
+                        required: true,
+                        pattern: {
+                          value: /^[0-9]{4}-[0-9]{5}$/i,
+                          message: 'invalid invoice No',
+                        },
+                      })}
+                      className={`w-full mb-8 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
+                        invoiceFormError.invoiceNo ? 'border-red-500' : ''
                       }`}
                     />
                   </label>

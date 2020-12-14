@@ -19,7 +19,7 @@ const schema = {
     type: 'object',
     additionalProperties: {
       // invoice request
-      invoiceNo: { type: 'string' },
+      invoice_no: { type: 'string' },
       client: { type: 'string' },
       client_address: {
         type: 'object',
@@ -63,9 +63,12 @@ const schema = {
     type: 'boolean',
     default: false,
   },
-  nextInvoiceNo: {
-    type: 'number',
-    default: 0,
+  dateInvoiceNumberMap: {
+    type: 'object',
+    additionalProperties: {
+      type: 'number',
+      default: 0,
+    },
   },
 };
 const store = new ElectronStore({ name: 'invoice', schema });
@@ -169,12 +172,17 @@ ipcMain.on('invoices_delete', (_event, id: string, synced: boolean) => {
   store.delete(`invocies.${id}`);
 });
 
-// get next invoice
-ipcMain.on('invoices_getInvoiceId', () => {
-  console.log('get next invoice ID');
-  // get id, then increment it
-  const nextId = store.get('nextInvoiceNo', 0);
-  store.set('nextInvoiceNo', nextId + 1);
+// get next invoice No
+ipcMain.handle('invoices_getNextInvoiceNo', (_event, dateKey: string) => {
+  if (!store.has(`dateInvoiceNumberMap.${dateKey}`)) {
+    store.set(`dateInvoiceNumberMap.${dateKey}`, 0);
+  }
+  return store.get(`dateInvoiceNumberMap.${dateKey}`);
 });
 
-// set next invoice
+// set next invoice No
+ipcMain.on(
+  'invoices_setNextInvoiceNo',
+  (_event, dateKey: string, newInvoiceNo: number) =>
+    store.set(`dateInvoiceNumberMap.${dateKey}`, newInvoiceNo)
+);
