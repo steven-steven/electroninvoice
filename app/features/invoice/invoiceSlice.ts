@@ -335,16 +335,16 @@ export const startListening = (): AppThunk => {
 
 export const subscribeToSyncState = (): AppThunk => {
   return (dispatch: AppDispatch) => {
-    ipcRenderer.on('syncStateListener', (_event, isSynced: boolean) => {
+    ipcRenderer.on('invoice_syncStateListener', (_event, isSynced: boolean) => {
       dispatch(setIsSynced(isSynced));
     });
-    ipcRenderer.send('syncStateListener');
+    ipcRenderer.send('invoice_syncStateListener');
   };
 };
 
 export const unsubscribeToSyncState = (): AppThunk => {
   return () => {
-    ipcRenderer.send('removeSyncStateListener');
+    ipcRenderer.send('invoice_removeSyncStateListener');
   };
 };
 

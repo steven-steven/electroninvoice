@@ -134,14 +134,14 @@ ipcMain.handle(
 );
 
 let removeListener = () => {};
-ipcMain.on('syncStateListener', (event) => {
+ipcMain.on('invoice_syncStateListener', (event) => {
   removeListener = store.onDidChange('isSynced', (newChange: boolean) => {
-    event.reply('syncStateListener', newChange);
+    event.reply('invoice_syncStateListener', newChange);
     // console.log("changed");
   });
 });
 
-ipcMain.on('removeSyncStateListener', (_event) => {
+ipcMain.on('invoice_removeSyncStateListener', (_event) => {
   // console.log('remove Listener');
   removeListener();
 });
