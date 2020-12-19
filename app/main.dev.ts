@@ -22,7 +22,8 @@ import angkaTerbilang from '@develoka/angka-terbilang-js';
 import MenuBuilder from './menu';
 import { Invoice } from './features/invoice/invoiceSlice';
 
-// import InvoiceRenderer from './renderer';
+require('./providers/invoiceStorage');
+require('./providers/itemStorage');
 
 export default class AppUpdater {
   constructor() {
@@ -243,7 +244,7 @@ ipcMain.on(
       angkaTerbilang(invoice.total.toString()).toUpperCase()
     );
     ejse.data('subtotal', formatPrice(invoice.subtotal));
-    ejse.data('id', invoice.id);
+    ejse.data('id', invoice.invoice_no);
 
     ejse.data('iconPath', `file://${__dirname}/icon.png`);
 

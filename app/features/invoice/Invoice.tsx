@@ -11,16 +11,29 @@ import {
   Invoice,
   getIsFetched,
   downloadInvoice,
+  initializeOfflineInvoices,
+  getIsSynced,
   status as invoiceStatus,
 } from './invoiceSlice';
-import { startListening } from '../connection/connectionSlice';
+import { initializeOfflineItems } from '../daftarBarang/daftarBarangSlice';
+import { startListening, getIsConnected } from '../connection/connectionSlice';
 
 export default function InvoicePage() {
   const invoices = useSelector(getInvoice);
   const status = useSelector(getStatus);
   const isFetched = useSelector(getIsFetched);
+  const isConnected = useSelector(getIsConnected);
+  const isSynced = useSelector(getIsSynced);
   const dispatch = useDispatch();
   // const selectedId = useSelector(getSelectedId);
+
+  useEffect(() => {
+    // get data from local (if first load has no connection)
+    if (status === invoiceStatus.IDLE && !isFetched && !isConnected) {
+      dispatch(initializeOfflineInvoices());
+      dispatch(initializeOfflineItems());
+    }
+  }, [dispatch, isFetched, status, isConnected]);
 
   useEffect(() => {
     if (status === invoiceStatus.IDLE && !isFetched) {
@@ -33,10 +46,11 @@ export default function InvoicePage() {
     () =>
       Object.values(invoices).map((invoice) => {
         return {
-          idCol: invoice.id,
+          id: invoice.id,
+          invoiceNo: invoice.invoice_no,
           clientCol: invoice.client,
           dateCol: invoice.date,
-          totalCol: invoice.total,
+          totalCol: invoice.total.toLocaleString('id'),
         };
       }),
     [invoices]
@@ -46,7 +60,8 @@ export default function InvoicePage() {
     () => [
       {
         Header: 'No. Invoice',
-        accessor: 'idCol',
+        id: 'sortableCol',
+        accessor: 'invoiceNo',
       },
       {
         Header: 'Nama Customer',
@@ -72,7 +87,7 @@ export default function InvoicePage() {
           return (
             <button
               type="button"
-              onClick={() => dispatch(downloadInvoice(row.values.idCol))}
+              onClick={() => dispatch(downloadInvoice(row.original.id))}
             >
               <i className="far fa-file-pdf fa-md" />
             </button>
@@ -89,7 +104,7 @@ export default function InvoicePage() {
           return (
             <button
               type="button"
-              onClick={() => dispatch(downloadInvoice(row.values.idCol, true))}
+              onClick={() => dispatch(downloadInvoice(row.original.id, true))}
             >
               <i className="far fa-file-pdf fa-md" />
             </button>
@@ -106,7 +121,7 @@ export default function InvoicePage() {
             <Link
               to={{
                 pathname: routes.ADDINVOICE,
-                search: `?id=${row.values.idCol}`,
+                search: `?id=${row.original.id}`,
               }}
             >
               <i className="far fa-edit fa-md" />
@@ -123,7 +138,7 @@ export default function InvoicePage() {
           return (
             <button
               type="button"
-              onClick={() => dispatch(deleteInvoiceCall(row.values.idCol))}
+              onClick={() => dispatch(deleteInvoiceCall(row.original.id))}
             >
               <i className="far fa-trash-alt fa-md" />
             </button>
@@ -136,7 +151,19 @@ export default function InvoicePage() {
 
   return (
     <div>
-      <div className="mt-8 flex items-center justify-center">
+      <div className="ml-3 text-gray-700 rounded-lg p-3">
+        <p className="text-xs">
+          Status:&nbsp;
+          {isSynced
+            ? '✅ tersimpan'
+            : '❌ sedang mencari koneksi internet untuk sinkronisasi data... (sementara ini, data sudah tersimpan dalam sistem)'}
+        </p>
+        <p className="text-xs">
+          Internet:&nbsp;
+          {isConnected ? '✅ terhubung' : '❌ terputus'}
+        </p>
+      </div>
+      <div className="flex flex-col items-center justify-center">
         {status === invoiceStatus.LOADING ? (
           <div className="text-center">
             <i className="fa fa-spinner fa-pulse fa-3x fa-fw" />

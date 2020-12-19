@@ -7,3 +7,5 @@
  * @project EJS
  * @license {@link http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0}
  */
+
+/** @license URI.js v4.4.0 (c) 2011 Gary Court. License: http://github.com/garycourt/uri-js */
