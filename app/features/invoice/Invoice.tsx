@@ -15,6 +15,7 @@ import {
   getIsSynced,
   status as invoiceStatus,
 } from './invoiceSlice';
+import { initializeOfflineItems } from '../daftarBarang/daftarBarangSlice';
 import { startListening, getIsConnected } from '../connection/connectionSlice';
 
 export default function InvoicePage() {
@@ -30,6 +31,7 @@ export default function InvoicePage() {
     // get data from local (if first load has no connection)
     if (status === invoiceStatus.IDLE && !isFetched && !isConnected) {
       dispatch(initializeOfflineInvoices());
+      dispatch(initializeOfflineItems());
     }
   }, [dispatch, isFetched, status, isConnected]);
 
@@ -58,6 +60,7 @@ export default function InvoicePage() {
     () => [
       {
         Header: 'No. Invoice',
+        id: 'sortableCol',
         accessor: 'invoiceNo',
       },
       {

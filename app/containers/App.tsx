@@ -2,9 +2,13 @@ import React, { ReactNode, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import Sidebar from '../components/Sidebar';
 import {
-  subscribeToSyncState,
-  unsubscribeToSyncState,
+  subscribeToSyncState as listenInvoiceSyncState,
+  unsubscribeToSyncState as unlistenInvoiceSyncState,
 } from '../features/invoice/invoiceSlice';
+import {
+  subscribeToSyncState as listenItemSyncState,
+  unsubscribeToSyncState as unlistenItemSyncState,
+} from '../features/daftarBarang/daftarBarangSlice';
 
 type Props = {
   children: ReactNode;
@@ -16,10 +20,12 @@ export default function App(props: Props) {
 
   useEffect(() => {
     // Run Once
-    dispatch(subscribeToSyncState());
+    dispatch(listenInvoiceSyncState());
+    dispatch(listenItemSyncState());
     return function cleanup() {
       // doesn't on page request which might cause memory leak. But this is not a problem in
-      dispatch(unsubscribeToSyncState());
+      dispatch(unlistenInvoiceSyncState());
+      dispatch(unlistenItemSyncState());
     };
   }, [dispatch]);
 

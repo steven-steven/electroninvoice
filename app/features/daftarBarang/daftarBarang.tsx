@@ -11,7 +11,9 @@ import {
   deleteItemCall,
   ItemRequest,
   addItemCall,
+  getIsSynced,
 } from './daftarBarangSlice';
+import { getIsConnected } from '../connection/connectionSlice';
 
 interface TableCells {
   nameCol: string;
@@ -23,6 +25,8 @@ interface TableCells {
 export default function InvoicePage() {
   const status = useSelector(getStatus);
   const items = useSelector(getItem);
+  const isConnected = useSelector(getIsConnected);
+  const isSynced = useSelector(getIsSynced);
   const dispatch = useDispatch();
 
   const {
@@ -46,7 +50,7 @@ export default function InvoicePage() {
         return {
           nameCol: item.name,
           descriptionCol: item.defaultDesc,
-          rateCol: item.rate,
+          rateCol: item.rate.toLocaleString('id'),
           itemId: item.id,
         };
       }),
@@ -57,6 +61,7 @@ export default function InvoicePage() {
     () => [
       {
         Header: 'Nama',
+        id: 'sortableCol',
         accessor: 'nameCol',
       },
       {
@@ -104,6 +109,16 @@ export default function InvoicePage() {
         )}
       </div>
       <div className="rightBox flex flex-col w-full md:w-1/3">
+        <div className="text-gray-700">
+          <p className="text-xs">
+            Status:&nbsp;
+            {isSynced ? '✅ tersimpan' : '❌'}
+          </p>
+          <p className="text-xs">
+            Internet:&nbsp;
+            {isConnected ? '✅ terhubung' : '❌ terputus'}
+          </p>
+        </div>
         <div className="invoiceInfoBox flex flex-col text-center text-gray-700 bg-white px-4 py-2 shadow-md">
           <div className="text-2xl mb-6 mt-4">Tambah Barang/Jasa</div>
           <form onSubmit={itemFormHandleSubmit(submitItem)}>

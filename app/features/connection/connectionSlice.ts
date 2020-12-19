@@ -13,6 +13,7 @@ import {
 import {
   startListening as startListeningItems,
   stopListening as stopListeningItems,
+  syncDirtyData as syncItems,
 } from '../daftarBarang/daftarBarangSlice';
 
 const connectionSlice = createSlice({
@@ -46,6 +47,7 @@ export const startListening = (): AppThunk => {
       if (snap.val() === true) {
         // sync dirty cache when it comes back up
         dispatch(syncInvoices());
+        dispatch(syncItems());
         // Internet Connected
         dispatch(setConnected());
         dispatch(startListeningInvoices());

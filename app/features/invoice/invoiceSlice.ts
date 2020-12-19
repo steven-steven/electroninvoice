@@ -247,9 +247,10 @@ export const addInvoiceCall = (newInvoice: InvoiceRequest): AppThunk => {
 
 export const deleteInvoiceCall = (id: string): AppThunk => {
   return async (dispatch: AppDispatch, getState: () => RootState) => {
+    const invoiceNo = getState().invoice.invoices[id].invoice_no;
     const isToDelete = await ipcRenderer.invoke(
       'confirmDelete',
-      `Menghapus Invoice #${id}`
+      `Menghapus Invoice #${invoiceNo}`
     );
     if (!isToDelete) {
       return;
