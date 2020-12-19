@@ -135,6 +135,7 @@ ipcMain.handle(
 
 let removeListener = () => {};
 ipcMain.on('invoice_syncStateListener', (event) => {
+  event.reply('invoice_syncStateListener', store.get('isSynced'));
   removeListener = store.onDidChange('isSynced', (newChange: boolean) => {
     event.reply('invoice_syncStateListener', newChange);
     // console.log("changed");
