@@ -320,6 +320,16 @@ export const downloadInvoice = (id: string, isKwitansi?: boolean): AppThunk => {
   };
 };
 
+export const backupToCSV = (): AppThunk => {
+  return (_dispatch: AppDispatch, getState: () => RootState) => {
+    const invoiceState = getState().invoice;
+    if (invoiceState.invoices) {
+      return ipcRenderer.send('download-csv', invoiceState.invoices);
+    }
+    return false;
+  };
+};
+
 export const startListening = (): AppThunk => {
   return (dispatch: AppDispatch) => {
     database.ref('invoice/documents').on('value', async () => {

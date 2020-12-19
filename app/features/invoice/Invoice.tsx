@@ -11,6 +11,7 @@ import {
   Invoice,
   getIsFetched,
   downloadInvoice,
+  backupToCSV,
   initializeOfflineInvoices,
   getIsSynced,
   status as invoiceStatus,
@@ -161,6 +162,12 @@ export default function InvoicePage() {
         <p className="text-xs">
           Internet:&nbsp;
           {isConnected ? '✅ terhubung' : '❌ terputus'}
+        </p>
+        <p className="text-xs">
+          Unduh Backup:&nbsp;
+          <button type="button" onClick={() => dispatch(backupToCSV())}>
+            <i className="far fa-file-excel fa-md" />
+          </button>
         </p>
       </div>
       <div className="flex flex-col items-center justify-center">

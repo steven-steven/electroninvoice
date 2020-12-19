@@ -15,12 +15,13 @@ import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import ejse from 'ejs-electron';
+import { createObjectCsvWriter } from 'csv-writer';
 import fs from 'fs';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import angkaTerbilang from '@develoka/angka-terbilang-js';
 import MenuBuilder from './menu';
-import { Invoice } from './features/invoice/invoiceSlice';
+import { Invoice, Invoices } from './features/invoice/invoiceSlice';
 
 require('./providers/invoiceStorage');
 require('./providers/itemStorage');
@@ -275,6 +276,75 @@ ipcMain.on(
     // InvoiceRenderer.save(mainWindow, invoice);
   }
 );
+
+function saveCsv(win: BrowserWindow, onSave: (savePath: string) => void) {
+  const options = {
+    title: 'Save file',
+    defaultPath: `${app.getPath('downloads')}/backup`,
+    buttonLabel: 'Save',
+
+    filters: [
+      { name: 'CSV files', extensions: ['csv'] },
+      { name: 'All Files', extensions: ['*'] },
+    ],
+  };
+
+  return dialog.showSaveDialog(win, options).then((result) => {
+    const savePath = result.filePath;
+    // clicked cancel
+    if (!savePath) {
+      return null;
+    }
+    onSave(savePath);
+    return savePath;
+  });
+}
+
+ipcMain.on('download-csv', (_event, invoices: Invoices) => {
+  const header = [
+    { id: 'id', title: 'Id' },
+    { id: 'invoice_no', title: 'Invoice_no' },
+    { id: 'client', title: 'Client' },
+    { id: 'client_address', title: 'Client_address' },
+    { id: 'catatanInvoice', title: 'CatatanInvoice' },
+    { id: 'catatanKwitansi', title: 'CatatanKwitansi' },
+    { id: 'date', title: 'Date' },
+    { id: 'items', title: 'Items' },
+    { id: 'tax', title: 'Tax' },
+    { id: 'total', title: 'Total' },
+    { id: 'subtotal', title: 'Subtotal' },
+    { id: 'createdAt', title: 'CreatedAt' },
+  ];
+  const data = Object.values(invoices).reduce((acc: Array<any>, invoice) => {
+    const clientAddress = invoice.client_address
+      ? [
+          invoice.client_address.address,
+          invoice.client_address.postal_code,
+          invoice.client_address.city,
+          invoice.client_address.state,
+          invoice.client_address.country,
+        ]
+          .filter(Boolean)
+          .join(', ')
+      : '';
+    const tax = Math.round((invoice.tax / 100) * invoice.subtotal);
+    const items = invoice.items.reduce((accStr, item) => {
+      return `${accStr}${item.name}-${item.rate}-${item.description}-${item.metricQuantity}-${item.quantity}-${item.amount},`;
+    }, '');
+    acc.push({ ...invoice, client_address: clientAddress, tax, items });
+    return acc;
+  }, []);
+  if (mainWindow) {
+    return saveCsv(mainWindow, (savePath) => {
+      const csvWriter = createObjectCsvWriter({
+        path: savePath,
+        header,
+      });
+      csvWriter.writeRecords(data);
+    });
+  }
+  return '';
+});
 
 ipcMain.handle(
   'confirmDelete',
