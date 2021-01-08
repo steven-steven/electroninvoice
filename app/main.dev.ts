@@ -25,6 +25,7 @@ import { Invoice, Invoices } from './features/invoice/invoiceSlice';
 
 require('./providers/invoiceStorage');
 require('./providers/itemStorage');
+require('./providers/customerStorage');
 
 export default class AppUpdater {
   constructor() {

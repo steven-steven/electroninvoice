@@ -38,12 +38,22 @@ const DaftarBarangPage = (props: Record<string, any>) => (
   </React.Suspense>
 );
 
+// Lazily load routes and code split with webpack
+const LazyCustomerPage = React.lazy(() => import('./containers/CustomerPage'));
+
+const CustomerPage = (props: Record<string, any>) => (
+  <React.Suspense fallback={<h1>Loading...</h1>}>
+    <LazyCustomerPage {...props} />
+  </React.Suspense>
+);
+
 export default function Routes() {
   return (
     <App>
       <Switch>
         <Route path={routes.ADDINVOICE} component={AddInvoicePage} />
         <Route path={routes.DAFTARBARANG} component={DaftarBarangPage} />
+        <Route path={routes.CUSTOMER} component={CustomerPage} />
         <Route path={routes.INVOICE} component={InvoicePage} />
       </Switch>
     </App>

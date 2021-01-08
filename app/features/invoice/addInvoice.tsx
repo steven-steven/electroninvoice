@@ -20,6 +20,11 @@ import {
   getItem,
   status as itemStatus,
 } from '../daftarBarang/daftarBarangSlice';
+import {
+  getCustomer,
+  Customer,
+  selectCustomer,
+} from '../customer/customerSlice';
 
 import { AppDispatch, RootState } from '../../store';
 
@@ -52,10 +57,11 @@ interface RightInvoiceForm {
   addr_postal: string;
 }
 
-export default function InvoicePage() {
+export default function AddInvoicePage() {
   const currInvoiceStatus = useSelector(getInvoiceStatus);
   const currItemStatus = useSelector(getItemStatus);
   const items = useSelector(getItem);
+  const customers = useSelector(getCustomer);
   const dispatch: AppDispatch = useDispatch();
   const history = useHistory();
 
@@ -100,6 +106,7 @@ export default function InvoicePage() {
   const [rowData, setRowData] = useState<TableData[]>(initialItems);
   const [originalData] = useState(rowData);
   const [selectedTransaction, setSelectedTransaction] = useState(''); // react-form-hook watcher doesn't seem to work for select
+  const [selectedClient, setSelectedClient] = useState(''); // react-form-hook watcher doesn't seem to work for select
   const [isUnitMetric, setIsUnitMetric] = useState<boolean | null>(null); // react-form-hook watcher doesn't seem to work for select
   const [toggleAccordion, setToggleAccordion] = useState(false);
   const [skipPageReset, setSkipPageReset] = useState(false);
@@ -271,11 +278,11 @@ export default function InvoicePage() {
           <i className="fa fa-spinner fa-pulse fa-3x fa-fw" />
         </div>
       ) : (
-        <div className="pageContainer p-6 flex justify-between flex-wrap-reverse">
-          <div className="leftBox flex flex-col pr-0 md:pr-8 w-full md:w-2/3">
-            <div className="AddItemBox flex flex-col text-center text-gray-700 bg-white px-4 py-2 shadow-md">
+        <div className="flex flex-wrap-reverse justify-between p-6 pageContainer">
+          <div className="flex flex-col w-full pr-0 leftBox md:pr-8 md:w-2/3">
+            <div className="flex flex-col px-4 py-2 text-center text-gray-700 bg-white shadow-md AddItemBox">
               <form onSubmit={itemFormHandleSubmit(addToRowData)}>
-                <div className="formBox text-left">
+                <div className="text-left formBox">
                   <label htmlFor="transaksi">
                     Barang/Jasa *
                     <div className="relative">
@@ -345,8 +352,8 @@ export default function InvoicePage() {
                   {isUnitMetric === false && (
                     <label htmlFor="jumlah">
                       Jumlah (unit)*
-                      <div className="mt-1 relative rounded-md shadow-sm">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <div className="relative mt-1 rounded-md shadow-sm">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                           <span className="text-gray-600">#</span>
                         </div>
                         <input
@@ -365,8 +372,8 @@ export default function InvoicePage() {
                   {isUnitMetric && (
                     <label htmlFor="metric">
                       Metric *
-                      <div className="mt-1 relative rounded-md shadow-sm">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <div className="relative mt-1 rounded-md shadow-sm">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                           <span className="text-gray-600">
                             {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
                             m<sup>2</sup>
@@ -384,7 +391,7 @@ export default function InvoicePage() {
                           }`}
                         />
                         <div className="absolute inset-y-0 right-0 flex items-center">
-                          <span className="text-lg pr-1 text-gray-800 pointer-events-none">
+                          <span className="pr-1 text-lg text-gray-800 pointer-events-none">
                             ,
                           </span>
                           <input
@@ -408,14 +415,14 @@ export default function InvoicePage() {
                 <div className="actionBox">
                   <button
                     type="submit"
-                    className="w-auto float-right mb-3 bg-transparent hover:bg-blue-600 text-black font-semibold hover:text-white py-2 px-4 border border-black hover:border-transparent rounded"
+                    className="float-right w-auto px-4 py-2 mb-3 font-semibold text-black bg-transparent border border-black rounded hover:bg-blue-600 hover:text-white hover:border-transparent"
                   >
                     Tambah
                   </button>
                 </div>
               </form>
             </div>
-            <div className="tableBox mt-8 flex flex-col text-center text-gray-700 bg-white shadow-md rounded-lg p-3">
+            <div className="flex flex-col p-3 mt-8 text-center text-gray-700 bg-white rounded-lg shadow-md tableBox">
               <EditableTable
                 columns={columns}
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -426,7 +433,7 @@ export default function InvoicePage() {
               />
               <div className="actionBox">
                 <button
-                  className="w-auto float-right mt-5 hover:bg-gray-100 text-xs text-gray-800 py-1 px-4 border border-gray-400 rounded"
+                  className="float-right w-auto px-4 py-1 mt-5 text-xs text-gray-800 border border-gray-400 rounded hover:bg-gray-100"
                   type="button"
                   onClick={resetData}
                 >
@@ -435,30 +442,42 @@ export default function InvoicePage() {
               </div>
             </div>
           </div>
-          <div className="rightBox flex flex-col w-full md:w-1/3">
+          <div className="flex flex-col w-full rightBox md:w-1/3">
             <form onSubmit={invoiceFormHandleSubmit(submitInvoice)}>
-              <div className="invoiceInfoBox flex flex-col text-center text-gray-700 bg-white px-4 py-2 shadow-md">
-                <div className="text-2xl mb-6 mt-4">
+              <div className="flex flex-col px-4 py-2 text-center text-gray-700 bg-white shadow-md invoiceInfoBox">
+                <div className="mt-4 mb-6 text-2xl">
                   {invoiceToEdit == null
                     ? 'Invoice Baru'
                     : `Edit invoice #${invoiceToEdit.invoice_no}`}
                 </div>
-                <div className="formBox text-left">
+                <div className="text-left formBox">
                   <label htmlFor="clientName">
                     Nama Client *
-                    <input
+                    <select
                       id="clientName"
                       name="clientName"
-                      type="text"
+                      className={`block mb-8 h-12 w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
+                        itemFormError.clientName ? 'border-red-500' : ''
+                      }`}
                       defaultValue={
                         invoiceToEdit == null ? '' : invoiceToEdit.client
                       }
-                      ref={invoiceFormRegister({ required: true })}
-                      placeholder="Pt. X"
-                      className={`w-full mb-8 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
-                        invoiceFormError.clientName ? 'border-red-500' : ''
-                      }`}
-                    />
+                      ref={itemFormRegister({ required: true })}
+                      onChange={(e) => {
+                        selectCustomer(e.target.value);
+                      }}
+                    >
+                      <option disabled value="">
+                        -- select opsi client --
+                      </option>
+                      {Object.values(customers).map((cus: Customer) => {
+                        return (
+                          <option key={cus.id} value={cus.id}>
+                            {cus.client}
+                          </option>
+                        );
+                      })}
+                    </select>
                   </label>
                   <label htmlFor="date">
                     Tanggal Invoice *
@@ -506,7 +525,7 @@ export default function InvoicePage() {
                   }
                   <button
                     type="button"
-                    className="mb-6 p-2 flex flex-row items-center text-left w-full border cursor-pointer"
+                    className="flex flex-row items-center w-full p-2 mb-6 text-left border cursor-pointer"
                     onClick={() => setToggleAccordion(!toggleAccordion)}
                   >
                     <span className="flex-grow">Lihat Lebih :</span>
@@ -517,119 +536,6 @@ export default function InvoicePage() {
                     />
                   </button>
                   <div className={`${toggleAccordion ? '' : 'hidden'}`}>
-                    <label htmlFor="noAlamat">
-                      Alamat Customer
-                      <div className="mt-1 relative rounded-md shadow-sm">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <span className="text-gray-600">Jln: </span>
-                        </div>
-                        <input
-                          id="addr_jln"
-                          name="addr_jln"
-                          type="text"
-                          defaultValue={
-                            invoiceToEdit != null &&
-                            invoiceToEdit.client_address
-                              ? invoiceToEdit.client_address.address
-                              : ''
-                          }
-                          ref={invoiceFormRegister()}
-                          className={`w-full pl-12 mb-3 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
-                            invoiceFormError.addr_jln ? 'border-red-500' : ''
-                          }`}
-                        />
-                      </div>
-                      <div className="mt-1 relative rounded-md shadow-sm">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <span className="text-gray-600">Kota: </span>
-                        </div>
-                        <input
-                          id="addr_kota"
-                          name="addr_kota"
-                          type="text"
-                          defaultValue={
-                            invoiceToEdit != null &&
-                            invoiceToEdit.client_address
-                              ? invoiceToEdit.client_address.city
-                              : ''
-                          }
-                          ref={invoiceFormRegister()}
-                          className={`w-full pl-16 mb-3 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
-                            invoiceFormError.addr_kota ? 'border-red-500' : ''
-                          }`}
-                        />
-                      </div>
-                      <div className="mt-1 relative rounded-md shadow-sm">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <span className="text-gray-600">Kode Pos: </span>
-                        </div>
-                        <input
-                          id="addr_postal"
-                          name="addr_postal"
-                          type="text"
-                          defaultValue={
-                            invoiceToEdit != null &&
-                            invoiceToEdit.client_address
-                              ? invoiceToEdit.client_address.postal_code
-                              : ''
-                          }
-                          ref={invoiceFormRegister()}
-                          className={`w-full pl-24 mb-3 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
-                            invoiceFormError.addr_postal ? 'border-red-500' : ''
-                          }`}
-                        />
-                      </div>
-                      <div className="mt-1 relative rounded-md shadow-sm">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <span className="text-gray-600">Provinsi: </span>
-                        </div>
-                        <input
-                          id="addr_provinsi"
-                          name="addr_provinsi"
-                          type="text"
-                          defaultValue={
-                            invoiceToEdit != null &&
-                            invoiceToEdit.client_address
-                              ? invoiceToEdit.client_address.state
-                              : ''
-                          }
-                          ref={invoiceFormRegister()}
-                          className={`w-full pl-20 mb-3 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
-                            invoiceFormError.addr_provinsi
-                              ? 'border-red-500'
-                              : ''
-                          }`}
-                        />
-                      </div>
-                      <div className="mt-1 relative rounded-md shadow-sm">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <span className="text-gray-600">Negara: </span>
-                        </div>
-                        <input
-                          id="addr_country"
-                          name="addr_country"
-                          placeholder="Indonesia"
-                          type="text"
-                          defaultValue={
-                            invoiceToEdit != null &&
-                            invoiceToEdit.client_address
-                              ? invoiceToEdit.client_address.country
-                              : ''
-                          }
-                          ref={invoiceFormRegister()}
-                          className={`w-full pl-20 mb-3 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
-                            invoiceFormError.addr_country
-                              ? 'border-red-500'
-                              : ''
-                          }`}
-                        />
-                      </div>
-                    </label>
-
-                    {
-                      // ADDRESS FORM END
-                    }
-
                     <label htmlFor="tax">
                       Pajak (%) *
                       <input
@@ -684,9 +590,9 @@ export default function InvoicePage() {
                   </div>
                 </div>
               </div>
-              <div className="totalBox font-display text-2xl bg-white px-4 py-2 mt-8 mb-10 md:mb-0 shadow-md">
+              <div className="px-4 py-2 mt-8 mb-10 text-2xl bg-white shadow-md totalBox font-display md:mb-0">
                 <span className="text-black">Total:</span>
-                <span className="pl-3 text-gray-700 font-hairline">
+                <span className="pl-3 font-hairline text-gray-700">
                   {`Rp. ${calculateTotal(
                     rowData.reduce((a, s) => {
                       const quantity = s.isMetric
@@ -700,11 +606,11 @@ export default function InvoicePage() {
                   )}`}
                 </span>
               </div>
-              <div className="totalBox font-display text-xl bg-white px-3 py-3 mt-8 mb-10 md:mb-0 shadow-md">
+              <div className="px-3 py-3 mt-8 mb-10 text-xl bg-white shadow-md totalBox font-display md:mb-0">
                 <button
                   type="submit"
                   name="addInvoice"
-                  className="block w-full bg-transparent hover:bg-blue-600 text-black font-semibold hover:text-white py-2 px-4 border border-black hover:border-transparent rounded"
+                  className="block w-full px-4 py-2 font-semibold text-black bg-transparent border border-black rounded hover:bg-blue-600 hover:text-white hover:border-transparent"
                 >
                   Simpan
                 </button>
@@ -712,7 +618,7 @@ export default function InvoicePage() {
                   <button
                     type="button"
                     onClick={() => dispatch(downloadInvoice(invoiceToEdit.id))}
-                    className="block w-full mt-3 bg-black hover:bg-blue-600 text-white font-semibold hover:text-white py-2 px-4 border border-black hover:border-transparent rounded"
+                    className="block w-full px-4 py-2 mt-3 font-semibold text-white bg-black border border-black rounded hover:bg-blue-600 hover:text-white hover:border-transparent"
                   >
                     Download PDF
                   </button>
@@ -722,7 +628,7 @@ export default function InvoicePage() {
                     type="button"
                     // eslint-disable-next-line prettier/prettier
                     onClick={() => dispatch(downloadInvoice(invoiceToEdit.id, true))}
-                    className="block w-full mt-3 bg-black hover:bg-blue-600 text-white font-semibold hover:text-white py-2 px-4 border border-black hover:border-transparent rounded"
+                    className="block w-full px-4 py-2 mt-3 font-semibold text-white bg-black border border-black rounded hover:bg-blue-600 hover:text-white hover:border-transparent"
                   >
                     Download Kwitansi
                   </button>

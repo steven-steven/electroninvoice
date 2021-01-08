@@ -1,6 +1,7 @@
 {
   "HOME": "/hoem",
   "INVOICE": "/",
+  "CUSTOMER": "/customer",
   "DAFTARBARANG": "/daftarBarang",
   "ADDINVOICE": "/addInvoice"
 }

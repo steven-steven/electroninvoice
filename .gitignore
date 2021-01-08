@@ -51,3 +51,5 @@ npm-debug.log.*
 
 #secrets
 app/config.json
+
+git-recovered/

@@ -183,7 +183,7 @@ ipcMain.on('invoices_delete', (_event, id: string, synced: boolean) => {
     store.set(`invoices.${id}.markedToDelete`, true);
     return;
   }
-  store.delete(`invocies.${id}`);
+  store.delete(`invoices.${id}`);
 });
 
 // get next invoice No
