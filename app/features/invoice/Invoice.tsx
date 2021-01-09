@@ -17,10 +17,15 @@ import {
   status as invoiceStatus,
 } from './invoiceSlice';
 import { initializeOfflineItems } from '../daftarBarang/daftarBarangSlice';
+import {
+  getCustomer,
+  initializeOfflineCustomers,
+} from '../customer/customerSlice';
 import { startListening, getIsConnected } from '../connection/connectionSlice';
 
 export default function InvoicePage() {
   const invoices = useSelector(getInvoice);
+  const customers = useSelector(getCustomer);
   const status = useSelector(getStatus);
   const isFetched = useSelector(getIsFetched);
   const isConnected = useSelector(getIsConnected);
@@ -33,6 +38,7 @@ export default function InvoicePage() {
     if (status === invoiceStatus.IDLE && !isFetched && !isConnected) {
       dispatch(initializeOfflineInvoices());
       dispatch(initializeOfflineItems());
+      dispatch(initializeOfflineCustomers());
     }
   }, [dispatch, isFetched, status, isConnected]);
 
@@ -49,12 +55,12 @@ export default function InvoicePage() {
         return {
           id: invoice.id,
           invoiceNo: invoice.invoice_no,
-          clientCol: invoice.client,
+          clientCol: customers[invoice.customerId]?.client,
           dateCol: invoice.date,
           totalCol: invoice.total.toLocaleString('id'),
         };
       }),
-    [invoices]
+    [customers, invoices]
   );
 
   const columns = React.useMemo(
@@ -152,7 +158,7 @@ export default function InvoicePage() {
 
   return (
     <div>
-      <div className="ml-3 text-gray-700 rounded-lg p-3">
+      <div className="p-3 ml-3 text-gray-700 rounded-lg">
         <p className="text-xs">
           Status:&nbsp;
           {isSynced
@@ -176,8 +182,8 @@ export default function InvoicePage() {
             <i className="fa fa-spinner fa-pulse fa-3x fa-fw" />
           </div>
         ) : (
-          <div className="tableBox w-11/12 flex flex-col text-center text-gray-700 bg-white shadow-md rounded-lg p-3">
-            <span className="text-left text-2xl ml-5 mb-3 font-display font-light">
+          <div className="flex flex-col w-11/12 p-3 text-center text-gray-700 bg-white rounded-lg shadow-md tableBox">
+            <span className="mb-3 ml-5 text-2xl font-light text-left font-display">
               Daftar Invoice
             </span>
             <MyTable columns={columns} data={data} />

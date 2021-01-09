@@ -195,6 +195,17 @@ export const deleteCustomerCall = (id: string): AppThunk => {
     if (!isToDelete) {
       return;
     }
+    const invoicesOwned = Object.values(getState().invoice.invoices);
+    for (let i = 0; i < invoicesOwned.length; i += 1) {
+      if (invoicesOwned[i].customerId === id) {
+        // cancel delete if customer has an invoice
+        ipcRenderer.send(
+          'showError',
+          'Gagal menghapus customer, karena customer ini mempunyai sejumlah invoice yang belum terhapus.'
+        );
+        return;
+      }
+    }
     dispatch(setLoading());
     if (!getState().connection.connected) {
       dispatch(deleteCustomer(id));

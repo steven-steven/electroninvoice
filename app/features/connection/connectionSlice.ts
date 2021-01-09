@@ -15,6 +15,12 @@ import {
   stopListening as stopListeningItems,
   syncDirtyData as syncItems,
 } from '../daftarBarang/daftarBarangSlice';
+// eslint-disable-next-line import/no-cycle
+import {
+  startListening as startListeningCustomer,
+  stopListening as stopListeningCustomer,
+  syncDirtyData as syncCustomer,
+} from '../customer/customerSlice';
 
 const connectionSlice = createSlice({
   name: 'connection',
@@ -48,15 +54,18 @@ export const startListening = (): AppThunk => {
         // sync dirty cache when it comes back up
         dispatch(syncInvoices());
         dispatch(syncItems());
+        dispatch(syncCustomer());
         // Internet Connected
         dispatch(setConnected());
         dispatch(startListeningInvoices());
         dispatch(startListeningItems());
+        dispatch(startListeningCustomer());
       } else {
         // Internet Disconnected
         dispatch(setDisconnected());
         dispatch(stopListeningInvoices());
         dispatch(stopListeningItems());
+        dispatch(stopListeningCustomer());
       }
     });
   };

@@ -22,6 +22,7 @@ import fs from 'fs';
 import angkaTerbilang from '@develoka/angka-terbilang-js';
 import MenuBuilder from './menu';
 import { Invoice, Invoices } from './features/invoice/invoiceSlice';
+import { Customer, Customers } from './features/customer/customerSlice';
 
 require('./providers/invoiceStorage');
 require('./providers/itemStorage');
@@ -192,63 +193,67 @@ function savePdf(
   });
 }
 
+const prepareDocument = (invoice: Invoice, customer: Customer) => {
+  if (customer.client_address) {
+    const addressLine1 = [
+      customer.client_address.address,
+      customer.client_address.postal_code,
+    ]
+      .filter(Boolean)
+      .join(', ');
+
+    const addressLine2 = [
+      customer.client_address.city,
+      customer.client_address.state,
+      customer.client_address.country,
+    ]
+      .filter(Boolean)
+      .join(', ');
+
+    ejse.data('addressLine1', addressLine1);
+    ejse.data('addressLine2', addressLine2);
+  }
+  ejse.data('catatanInvoice', invoice.catatanInvoice);
+  ejse.data('catatanKwitansi', invoice.catatanKwitansi);
+
+  ejse.data('client', customer.client);
+  ejse.data(
+    'items',
+    invoice.items.map((item) => {
+      const isUnitMetric = item.metricQuantity && item.metricQuantity > 0;
+      return {
+        ...item,
+        amount: formatPrice(item.amount),
+        rate: formatPrice(item.rate),
+        quantity: isUnitMetric
+          ? formatPrice(item.metricQuantity / 1000.0)
+          : item.quantity,
+        isMetric: isUnitMetric,
+      };
+    })
+  );
+  ejse.data('date', invoice.date);
+  ejse.data('taxPercent', invoice.tax);
+  ejse.data(
+    'tax',
+    formatPrice(Math.round((invoice.tax / 100) * invoice.subtotal))
+  );
+  ejse.data('total', formatPrice(invoice.total));
+  ejse.data(
+    'terbilang',
+    angkaTerbilang(invoice.total.toString()).toUpperCase()
+  );
+  ejse.data('subtotal', formatPrice(invoice.subtotal));
+  ejse.data('id', invoice.invoice_no);
+
+  ejse.data('iconPath', `file://${__dirname}/icon.png`);
+};
+
 ipcMain.on(
   'download-invoice',
-  (_event, invoice: Invoice, isKwitansi?: boolean) => {
+  (_event, invoice: Invoice, customer: Customer, isKwitansi?: boolean) => {
     const pdfType = isKwitansi ? 'kwitansi' : 'invoice';
-    if (invoice.client_address) {
-      const addressLine1 = [
-        invoice.client_address.address,
-        invoice.client_address.postal_code,
-      ]
-        .filter(Boolean)
-        .join(', ');
-
-      const addressLine2 = [
-        invoice.client_address.city,
-        invoice.client_address.state,
-        invoice.client_address.country,
-      ]
-        .filter(Boolean)
-        .join(', ');
-
-      ejse.data('addressLine1', addressLine1);
-      ejse.data('addressLine2', addressLine2);
-    }
-    ejse.data('catatanInvoice', invoice.catatanInvoice);
-    ejse.data('catatanKwitansi', invoice.catatanKwitansi);
-
-    ejse.data('client', invoice.client);
-    ejse.data(
-      'items',
-      invoice.items.map((item) => {
-        const isUnitMetric = item.metricQuantity && item.metricQuantity > 0;
-        return {
-          ...item,
-          amount: formatPrice(item.amount),
-          rate: formatPrice(item.rate),
-          quantity: isUnitMetric
-            ? formatPrice(item.metricQuantity / 1000.0)
-            : item.quantity,
-          isMetric: isUnitMetric,
-        };
-      })
-    );
-    ejse.data('date', invoice.date);
-    ejse.data('taxPercent', invoice.tax);
-    ejse.data(
-      'tax',
-      formatPrice(Math.round((invoice.tax / 100) * invoice.subtotal))
-    );
-    ejse.data('total', formatPrice(invoice.total));
-    ejse.data(
-      'terbilang',
-      angkaTerbilang(invoice.total.toString()).toUpperCase()
-    );
-    ejse.data('subtotal', formatPrice(invoice.subtotal));
-    ejse.data('id', invoice.invoice_no);
-
-    ejse.data('iconPath', `file://${__dirname}/icon.png`);
+    prepareDocument(invoice, customer);
 
     pdfWindow = new BrowserWindow({
       show: false,
@@ -263,7 +268,7 @@ ipcMain.on(
           .printToPDF(pdfSettings())
           .then((data) => {
             if (mainWindow)
-              return savePdf(mainWindow, data, invoice.id, pdfType);
+              return savePdf(mainWindow, data, invoice.invoice_no, pdfType);
             return '';
           })
           .catch((error) => {
@@ -272,9 +277,23 @@ ipcMain.on(
           });
       }
     });
-
     // if (mainWindow == null) return;
     // InvoiceRenderer.save(mainWindow, invoice);
+  }
+);
+
+ipcMain.on(
+  'view-invoice',
+  (_event, invoice: Invoice, customer: Customer, isKwitansi?: boolean) => {
+    const pdfType = isKwitansi ? 'kwitansi' : 'invoice';
+    prepareDocument(invoice, customer);
+
+    pdfWindow = new BrowserWindow({
+      show: true,
+    });
+    pdfWindow.loadURL(`file://${__dirname}/${pdfType}Template.ejs`);
+    log.info('LOAD');
+    log.info(`file://${__dirname}/${pdfType}Template.ejs`);
   }
 );
 
@@ -301,51 +320,55 @@ function saveCsv(win: BrowserWindow, onSave: (savePath: string) => void) {
   });
 }
 
-ipcMain.on('download-csv', (_event, invoices: Invoices) => {
-  const header = [
-    { id: 'id', title: 'Id' },
-    { id: 'invoice_no', title: 'Invoice_no' },
-    { id: 'client', title: 'Client' },
-    { id: 'client_address', title: 'Client_address' },
-    { id: 'catatanInvoice', title: 'CatatanInvoice' },
-    { id: 'catatanKwitansi', title: 'CatatanKwitansi' },
-    { id: 'date', title: 'Date' },
-    { id: 'items', title: 'Items' },
-    { id: 'tax', title: 'Tax' },
-    { id: 'total', title: 'Total' },
-    { id: 'subtotal', title: 'Subtotal' },
-    { id: 'createdAt', title: 'CreatedAt' },
-  ];
-  const data = Object.values(invoices).reduce((acc: Array<any>, invoice) => {
-    const clientAddress = invoice.client_address
-      ? [
-          invoice.client_address.address,
-          invoice.client_address.postal_code,
-          invoice.client_address.city,
-          invoice.client_address.state,
-          invoice.client_address.country,
-        ]
-          .filter(Boolean)
-          .join(', ')
-      : '';
-    const tax = Math.round((invoice.tax / 100) * invoice.subtotal);
-    const items = invoice.items.reduce((accStr, item) => {
-      return `${accStr}${item.name}-${item.rate}-${item.description}-${item.metricQuantity}-${item.quantity}-${item.amount},`;
-    }, '');
-    acc.push({ ...invoice, client_address: clientAddress, tax, items });
-    return acc;
-  }, []);
-  if (mainWindow) {
-    return saveCsv(mainWindow, (savePath) => {
-      const csvWriter = createObjectCsvWriter({
-        path: savePath,
-        header,
+ipcMain.on(
+  'download-csv',
+  (_event, invoices: Invoices, customers: Customers) => {
+    const header = [
+      { id: 'id', title: 'Id' },
+      { id: 'invoice_no', title: 'Invoice_no' },
+      { id: 'client', title: 'Client' },
+      { id: 'client_address', title: 'Client_address' },
+      { id: 'catatanInvoice', title: 'CatatanInvoice' },
+      { id: 'catatanKwitansi', title: 'CatatanKwitansi' },
+      { id: 'date', title: 'Date' },
+      { id: 'items', title: 'Items' },
+      { id: 'tax', title: 'Tax' },
+      { id: 'total', title: 'Total' },
+      { id: 'subtotal', title: 'Subtotal' },
+      { id: 'createdAt', title: 'CreatedAt' },
+    ];
+    const data = Object.values(invoices).reduce((acc: Array<any>, invoice) => {
+      const customer = customers[invoice.customerId];
+      const clientAddress = customer.client_address
+        ? [
+            customer.client_address.address,
+            customer.client_address.postal_code,
+            customer.client_address.city,
+            customer.client_address.state,
+            customer.client_address.country,
+          ]
+            .filter(Boolean)
+            .join(', ')
+        : '';
+      const tax = Math.round((invoice.tax / 100) * invoice.subtotal);
+      const items = invoice.items.reduce((accStr, item) => {
+        return `${accStr}${item.name}-${item.rate}-${item.description}-${item.metricQuantity}-${item.quantity}-${item.amount},`;
+      }, '');
+      acc.push({ ...invoice, client_address: clientAddress, tax, items });
+      return acc;
+    }, []);
+    if (mainWindow) {
+      return saveCsv(mainWindow, (savePath) => {
+        const csvWriter = createObjectCsvWriter({
+          path: savePath,
+          header,
+        });
+        csvWriter.writeRecords(data);
       });
-      csvWriter.writeRecords(data);
-    });
+    }
+    return '';
   }
-  return '';
-});
+);
 
 ipcMain.handle(
   'confirmDelete',

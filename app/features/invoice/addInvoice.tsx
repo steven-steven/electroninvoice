@@ -44,7 +44,7 @@ interface TableData {
   harga: string;
 }
 interface RightInvoiceForm {
-  clientName: string;
+  clientId: string;
   date: string;
   tax: string;
   catatankwitansi: string;
@@ -165,14 +165,7 @@ export default function AddInvoicePage() {
   const submitInvoice = async (data: RightInvoiceForm) => {
     const newInvoice = {
       invoice_no: invoiceNo,
-      client: data.clientName,
-      client_address: {
-        address: data.addr_jln,
-        city: data.addr_kota,
-        state: data.addr_provinsi,
-        country: data.addr_country,
-        postal_code: data.addr_postal,
-      },
+      customerId: selectedClient,
       date: Moment(data.date).format('DD/MM/YYYY'),
       items: rowData.map((item) => {
         const isMetric = item.isMetric === '1';
@@ -444,27 +437,31 @@ export default function AddInvoicePage() {
           </div>
           <div className="flex flex-col w-full rightBox md:w-1/3">
             <form onSubmit={invoiceFormHandleSubmit(submitInvoice)}>
-              <div className="flex flex-col px-4 py-2 text-center text-gray-700 bg-white shadow-md invoiceInfoBox">
+              <div
+                className={`flex flex-col px-4 py-2 text-center text-gray-700 ${
+                  invoiceToEdit ? 'bg-blue-200' : 'bg-white'
+                } shadow-md invoiceInfoBox`}
+              >
                 <div className="mt-4 mb-6 text-2xl">
                   {invoiceToEdit == null
                     ? 'Invoice Baru'
                     : `Edit invoice #${invoiceToEdit.invoice_no}`}
                 </div>
                 <div className="text-left formBox">
-                  <label htmlFor="clientName">
+                  <label htmlFor="clientId">
                     Nama Client *
                     <select
-                      id="clientName"
-                      name="clientName"
+                      id="clientId"
+                      name="clientId"
                       className={`block mb-8 h-12 w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
-                        itemFormError.clientName ? 'border-red-500' : ''
+                        itemFormError.clientId ? 'border-red-500' : ''
                       }`}
                       defaultValue={
-                        invoiceToEdit == null ? '' : invoiceToEdit.client
+                        invoiceToEdit == null ? '' : invoiceToEdit.customerId
                       }
                       ref={itemFormRegister({ required: true })}
                       onChange={(e) => {
-                        selectCustomer(e.target.value);
+                        setSelectedClient(e.target.value);
                       }}
                     >
                       <option disabled value="">

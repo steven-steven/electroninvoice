@@ -12,21 +12,13 @@ import { UnsavedChanges } from '../../providers/invoiceStorage';
 
 export interface InvoiceRequest {
   invoice_no: string;
-  client: string;
-  client_address?: {
-    address?: string;
-    city?: string;
-    state?: string;
-    country?: string;
-    postal_code?: string;
-  };
+  customerId: string;
   catatanInvoice: string;
   catatanKwitansi: string;
   date: string;
   items: Item[];
   tax: number;
 }
-
 export interface Invoice extends InvoiceRequest {
   id: string;
   createdAt: string;
@@ -309,10 +301,31 @@ export const updateInvoiceCall = (
 export const downloadInvoice = (id: string, isKwitansi?: boolean): AppThunk => {
   return (_dispatch: AppDispatch, getState: () => RootState) => {
     const invoiceState = getState().invoice;
+    const customerState = getState().customer;
     if (invoiceState.invoices) {
+      const invoiceRef = invoiceState.invoices[id];
       return ipcRenderer.send(
         'download-invoice',
-        invoiceState.invoices[id],
+        invoiceRef,
+        customerState.customers[invoiceRef.customerId],
+        isKwitansi
+      );
+    }
+    return false;
+  };
+};
+
+export const viewInvoice = (id: string, isKwitansi?: boolean): AppThunk => {
+  return (_dispatch: AppDispatch, getState: () => RootState) => {
+    const invoiceState = getState().invoice;
+    const customerState = getState().customer;
+    if (invoiceState.invoices) {
+      const invoiceRef = invoiceState.invoices[id];
+      console.log('sending...');
+      return ipcRenderer.send(
+        'view-invoice',
+        invoiceRef,
+        customerState.customers[invoiceRef.customerId],
         isKwitansi
       );
     }
@@ -323,8 +336,13 @@ export const downloadInvoice = (id: string, isKwitansi?: boolean): AppThunk => {
 export const backupToCSV = (): AppThunk => {
   return (_dispatch: AppDispatch, getState: () => RootState) => {
     const invoiceState = getState().invoice;
+    const customerState = getState().customer;
     if (invoiceState.invoices) {
-      return ipcRenderer.send('download-csv', invoiceState.invoices);
+      return ipcRenderer.send(
+        'download-csv',
+        invoiceState.invoices,
+        customerState.customers
+      );
     }
     return false;
   };
