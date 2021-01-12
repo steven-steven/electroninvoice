@@ -212,6 +212,9 @@ const prepareDocument = (invoice: Invoice, customer: Customer) => {
 
     ejse.data('addressLine1', addressLine1);
     ejse.data('addressLine2', addressLine2);
+  } else {
+    ejse.data('addressLine1', '');
+    ejse.data('addressLine2', '');
   }
   ejse.data('catatanInvoice', invoice.catatanInvoice);
   ejse.data('catatanKwitansi', invoice.catatanKwitansi);
