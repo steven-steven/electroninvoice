@@ -321,7 +321,6 @@ export const viewInvoice = (id: string, isKwitansi?: boolean): AppThunk => {
     const customerState = getState().customer;
     if (invoiceState.invoices) {
       const invoiceRef = invoiceState.invoices[id];
-      console.log('sending...');
       return ipcRenderer.send(
         'view-invoice',
         invoiceRef,

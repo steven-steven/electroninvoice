@@ -10,8 +10,11 @@
       margin: 0;
       background-color: white;
     }
+    #kwitansi .invoice-box{
+      margin-top: 30px;
+    }
     .invoice-box {
-        margin: 50px;
+        margin:30px 50px 10px 50px;
         position: relative;
         background-color: white;
         font-size: 12px;
@@ -42,7 +45,7 @@
     .invoice-box table.headerInfo {
       width: auto;
       line-height: normal;
-      margin-bottom: 15px;
+      margin-bottom: 5px;
     }
 
     .invoice-box table.headerInfo td:first-child {
@@ -76,6 +79,15 @@
     table.mainTable tr.total td:nth-child(n+4) {
         font-weight: bold;
     }
+
+    .totalBlock {
+      -webkit-print-color-adjust: exact;
+      background-color: antiquewhite;
+      padding: 5px 50px;
+      border-top: 1px solid black;
+      border-bottom: 1px solid black;
+    }
+
     </style>
   </head>
 
@@ -202,7 +214,7 @@
             </tr>
         </table>
 
-        <div style="display:flex; margin-top:30px;">
+        <div style="display:flex; margin-top:10px;">
           <div style="flex-basis:70%">
             <b><u>Catatan</u></b>
             <span style="display: block; padding-right:100px;"><%= catatanInvoice %></span>
@@ -216,5 +228,58 @@
           </div>
         </div>
     </div>
+
+    <section id="kwitansi">
+      <hr/>
+      <div class="invoice-box">
+        <div style="text-align:center;">
+          <img src="<%= iconPath %>" style="float:left; max-width:70px; position:absolute; left:2px; top:-15px;">
+          <span class="title">PT DWIPRIMA KARYAGUNA</span><br/>
+          <span class="subTitle">JALAN RAYA ANYER NO. 122 CILEGON, Telp. 0254-312114, Fax:0254-310084</span>
+        </div>
+        <hr/>
+        <div style="margin-top:10px;">
+          <table class="headerInfo" cellpadding="0" cellspacing="0">
+            <tr>
+              <td><u>KWITANSI NO :</u></td>
+              <td>
+                <%= id %>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <div style="padding-left: 6px">
+          Sudah Terima Dari:  <%= client %>
+          <br/>
+          <b> Uang sebanyak Rp. # <span style="font-family: helvetica-light;"><%= terbilang %></span> # </b>
+          <br/>
+          Untuk Pembayaran: <%= items.map((item) => item.name).join(',  ') %>
+
+          <div style="display:flex;">
+            <div style="flex-basis:70%; margin-top:40px;">
+              <div style="margin-left:50px;">
+                <span class="totalBlock">
+                  Rp. <%= total %>
+                </span>
+              </div>
+              <br/>
+              <b><u>Catatan</u></b>
+              <span style="display: block; padding-right:100px;"><%= catatanKwitansi %></span>
+            </div>
+            <div style="text-align:center;">
+              <!-- Tanggal Kwitansi, tempat kwitansi -->
+              <p>Cilegon, <%= date %></p>
+              <br/>
+              <br/>
+              <br/>
+              <b><u>( Witarso )</u></b>
+              <span style="display: block;">Direktur</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </body>
 </html>

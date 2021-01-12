@@ -15,6 +15,7 @@ import {
   initializeOfflineInvoices,
   getIsSynced,
   status as invoiceStatus,
+  viewInvoice,
 } from './invoiceSlice';
 import { initializeOfflineItems } from '../daftarBarang/daftarBarangSlice';
 import {
@@ -85,6 +86,22 @@ export default function InvoicePage() {
         disableSortBy: true,
       },
       {
+        Header: 'Lihat Invoice',
+        id: 'view',
+        collapse: true,
+        // eslint-disable-next-line react/display-name
+        Cell: ({ row }: CellProps<Invoice>) => {
+          return (
+            <button
+              type="button"
+              onClick={() => dispatch(viewInvoice(row.original.id))}
+            >
+              <i className="far fa-eye fa-md" />
+            </button>
+          );
+        },
+      },
+      {
         // Make an expander cell
         Header: 'Unduh Invoice',
         id: 'download',
@@ -95,23 +112,6 @@ export default function InvoicePage() {
             <button
               type="button"
               onClick={() => dispatch(downloadInvoice(row.original.id))}
-            >
-              <i className="far fa-file-pdf fa-md" />
-            </button>
-          );
-        },
-      },
-      {
-        // Make an expander cell
-        Header: 'Unduh Kwitansi',
-        id: 'kwitansi',
-        collapse: true,
-        // eslint-disable-next-line react/display-name
-        Cell: ({ row }: CellProps<Invoice>) => {
-          return (
-            <button
-              type="button"
-              onClick={() => dispatch(downloadInvoice(row.original.id, true))}
             >
               <i className="far fa-file-pdf fa-md" />
             </button>
