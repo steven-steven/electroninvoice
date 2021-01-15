@@ -33,6 +33,7 @@ const schema = {
       },
       catatanInvoice: { type: 'string' },
       catatanKwitansi: { type: 'string' },
+      keteranganKwitansi: { type: 'string' },
       date: { type: 'string' },
       items: {
         type: 'array',

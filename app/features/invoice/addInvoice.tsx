@@ -49,6 +49,7 @@ interface RightInvoiceForm {
   tax: string;
   catatankwitansi: string;
   catataninvoice: string;
+  keteranganKwitansi: string;
   // address
   addr_jln: string;
   addr_kota: string;
@@ -130,9 +131,10 @@ export default function AddInvoicePage() {
   useEffect(() => {
     if (invoiceToEdit) {
       setInvoiceNo(invoiceToEdit.invoice_no);
+      setSelectedClient(invoiceToEdit.customerId);
       return;
     }
-    // Using an IIFE
+    // Using an IIFE. change invoice id based on date
     (async function anyNameFunction() {
       const newInvoiceNumber: number = await dispatch(
         getInvoiceNumber(Moment(watchedDate).format('YY'))
@@ -183,6 +185,7 @@ export default function AddInvoicePage() {
       }),
       catatanInvoice: data.catataninvoice,
       catatanKwitansi: data.catatankwitansi,
+      keteranganKwitansi: data.keteranganKwitansi,
       tax: parseInt(data.tax, 10),
     };
 
@@ -514,6 +517,24 @@ export default function AddInvoicePage() {
                       })}
                       className={`w-full mb-8 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
                         invoiceFormError.invoiceNo ? 'border-red-500' : ''
+                      }`}
+                    />
+                  </label>
+                  <label htmlFor="keteranganKwitansi">
+                    Keterangan pembelian di Kwitansi
+                    <textarea
+                      id="keteranganKwitansi"
+                      name="keteranganKwitansi"
+                      ref={invoiceFormRegister}
+                      rows={1}
+                      placeholder="contoh: 'barang1, barang2'"
+                      defaultValue={
+                        invoiceToEdit == null
+                          ? ''
+                          : invoiceToEdit.keteranganKwitansi
+                      }
+                      className={`w-full mb-3 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
+                        itemFormError.keteranganKwitansi ? 'border-red-500' : ''
                       }`}
                     />
                   </label>

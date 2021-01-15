@@ -219,6 +219,15 @@ const prepareDocument = (invoice: Invoice, customer: Customer) => {
   ejse.data('catatanInvoice', invoice.catatanInvoice);
   ejse.data('catatanKwitansi', invoice.catatanKwitansi);
 
+  if (invoice.keteranganKwitansi) {
+    ejse.data('keteranganKwitansi', invoice.keteranganKwitansi);
+  } else {
+    ejse.data(
+      'keteranganKwitansi',
+      invoice.items.map((item) => item.name).join(',  ')
+    );
+  }
+
   ejse.data('client', customer.client);
   ejse.data(
     'items',
@@ -333,6 +342,7 @@ ipcMain.on(
       { id: 'client_address', title: 'Client_address' },
       { id: 'catatanInvoice', title: 'CatatanInvoice' },
       { id: 'catatanKwitansi', title: 'CatatanKwitansi' },
+      { id: 'keteranganKwitansi', title: 'keteranganKwitansi' },
       { id: 'date', title: 'Date' },
       { id: 'items', title: 'Items' },
       { id: 'tax', title: 'Tax' },

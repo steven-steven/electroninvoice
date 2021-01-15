@@ -15,6 +15,7 @@ export interface InvoiceRequest {
   customerId: string;
   catatanInvoice: string;
   catatanKwitansi: string;
+  keteranganKwitansi: string; // list of items
   date: string;
   items: Item[];
   tax: number;
