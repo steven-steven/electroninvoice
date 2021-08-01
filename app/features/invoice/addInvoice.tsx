@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
+import ReactSelect from 'react-select';
 import { useLocation, useHistory } from 'react-router-dom';
 import Moment from 'moment';
 import MomentTz from 'moment-timezone';
@@ -79,9 +80,14 @@ export default function AddInvoicePage() {
     [items]
   );
 
-  const sortedCustomerList = React.useMemo(
+  const sortedCustomerSelections = React.useMemo(
     () =>
-      Object.values(customers).sort((a, b) => (a.client > b.client ? 1 : -1)),
+      Object.values(customers)
+        .sort((a, b) => (a.client > b.client ? 1 : -1))
+        .map((cus: Customer) => ({
+          value: cus.id,
+          label: cus.client,
+        })),
     [customers]
   );
 
@@ -131,6 +137,7 @@ export default function AddInvoicePage() {
     handleSubmit: invoiceFormHandleSubmit,
     errors: invoiceFormError,
     watch: invoiceWatch,
+    control: invoiceFormControl,
   } = useForm();
   const watchedDate = invoiceWatch('date');
 
@@ -457,33 +464,42 @@ export default function AddInvoicePage() {
                     : `Edit invoice #${invoiceToEdit.invoice_no}`}
                 </div>
                 <div className="text-left formBox">
+                  {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
                   <label htmlFor="clientId">
                     Nama Client *
-                    <select
-                      id="clientId"
-                      name="clientId"
-                      className={`block mb-8 h-12 w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
-                        itemFormError.clientId ? 'border-red-500' : ''
+                    <div
+                      className={`block mb-8 w-full bg-gray-200 border border-gray-200 px-1 py-1 ${
+                        invoiceFormError.clientId ? 'border-red-500' : ''
                       }`}
-                      defaultValue={
-                        invoiceToEdit == null ? '' : invoiceToEdit.customerId
-                      }
-                      ref={itemFormRegister({ required: true })}
-                      onChange={(e) => {
-                        setSelectedClient(e.target.value);
-                      }}
                     >
-                      <option disabled value="">
-                        -- select opsi client --
-                      </option>
-                      {sortedCustomerList.map((cus: Customer) => {
-                        return (
-                          <option key={cus.id} value={cus.id}>
-                            {cus.client}
-                          </option>
-                        );
-                      })}
-                    </select>
+                      <Controller
+                        rules={{ required: true }}
+                        name="clientId"
+                        control={invoiceFormControl}
+                        defaultValue={
+                          invoiceToEdit == null ? '' : invoiceToEdit.customerId
+                        }
+                        render={({ ref, name, value, onChange }) => (
+                          <>
+                            <ReactSelect
+                              isClearable
+                              isSearchable
+                              id="clientId"
+                              name={name}
+                              ref={ref}
+                              options={sortedCustomerSelections}
+                              onChange={(e: { value: string }) => {
+                                onChange(e.value);
+                                setSelectedClient(e.value);
+                              }}
+                              value={sortedCustomerSelections.find(
+                                (c) => c.value === value
+                              )}
+                            />
+                          </>
+                        )}
+                      />
+                    </div>
                   </label>
                   <label htmlFor="date">
                     Tanggal Invoice *
