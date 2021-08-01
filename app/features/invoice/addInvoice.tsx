@@ -79,6 +79,12 @@ export default function AddInvoicePage() {
     [items]
   );
 
+  const sortedCustomerList = React.useMemo(
+    () =>
+      Object.values(customers).sort((a, b) => (a.client > b.client ? 1 : -1)),
+    [customers]
+  );
+
   // check if its Edit or new Invoice page
   const editQueryString = useLocation().search;
   const editId = new URLSearchParams(editQueryString).get('id');
@@ -470,7 +476,7 @@ export default function AddInvoicePage() {
                       <option disabled value="">
                         -- select opsi client --
                       </option>
-                      {Object.values(customers).map((cus: Customer) => {
+                      {sortedCustomerList.map((cus: Customer) => {
                         return (
                           <option key={cus.id} value={cus.id}>
                             {cus.client}

@@ -138,11 +138,11 @@ app.on('activate', () => {
   if (mainWindow === null) createWindow();
 });
 
-function pdfSettings() {
+function pdfSettings(pageSize = 'A4') {
   const option = {
     landscape: false,
     marginsType: 1,
-    pageSize: 'A4',
+    pageSize,
   };
   return option;
 }
@@ -263,7 +263,13 @@ const prepareDocument = (invoice: Invoice, customer: Customer) => {
 
 ipcMain.on(
   'download-invoice',
-  (_event, invoice: Invoice, customer: Customer, isKwitansi?: boolean) => {
+  (
+    _event,
+    invoice: Invoice,
+    customer: Customer,
+    isKwitansi?: boolean,
+    pageSize?: string
+  ) => {
     const pdfType = isKwitansi ? 'kwitansi' : 'invoice';
     prepareDocument(invoice, customer);
 
@@ -277,7 +283,7 @@ ipcMain.on(
     pdfWindow.webContents.on('did-finish-load', () => {
       if (pdfWindow) {
         pdfWindow.webContents
-          .printToPDF(pdfSettings())
+          .printToPDF(pdfSettings(pageSize))
           .then((data) => {
             if (mainWindow)
               return savePdf(mainWindow, data, invoice.invoice_no, pdfType);

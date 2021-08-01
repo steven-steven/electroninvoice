@@ -16,6 +16,8 @@ import {
   getIsSynced,
   status as invoiceStatus,
   viewInvoice,
+  setPrintPageSize,
+  getPrintPageSize,
 } from './invoiceSlice';
 import { initializeOfflineItems } from '../daftarBarang/daftarBarangSlice';
 import {
@@ -31,6 +33,7 @@ export default function InvoicePage() {
   const isFetched = useSelector(getIsFetched);
   const isConnected = useSelector(getIsConnected);
   const isSynced = useSelector(getIsSynced);
+  const printPageSize = useSelector(getPrintPageSize);
   const dispatch = useDispatch();
   // const selectedId = useSelector(getSelectedId);
 
@@ -175,6 +178,20 @@ export default function InvoicePage() {
             <i className="far fa-file-excel fa-md" />
           </button>
         </p>
+        <span className="text-xs">Ukuran print:&nbsp;</span>
+        <select
+          value={printPageSize || 'A4'}
+          onChange={(e) => {
+            dispatch(setPrintPageSize(e.target.value));
+          }}
+          className="h-6 text-sm border border-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          {['A4', 'A5', 'Letter', 'Legal'].map((pageSizeOption) => (
+            <option key={pageSizeOption} value={pageSizeOption}>
+              {pageSizeOption}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="flex flex-col items-center justify-center">
         {status === invoiceStatus.LOADING ? (

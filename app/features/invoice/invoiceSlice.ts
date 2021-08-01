@@ -50,6 +50,7 @@ const invoiceSlice = createSlice({
   initialState: {
     selectedInvoice: null as string | null,
     invoices: {} as Invoices,
+    printPageSize: null as string | null,
     status: status.IDLE,
     isFetched: false,
     isSynced: false,
@@ -97,6 +98,12 @@ const invoiceSlice = createSlice({
         selectedInvoice: id.payload,
       };
     },
+    setPrintPageSize: (state, pageSize: PayloadAction<string>) => {
+      return {
+        ...state,
+        printPageSize: pageSize.payload,
+      };
+    },
     setLoading: (state) => {
       return {
         ...state,
@@ -124,6 +131,7 @@ export const {
   deleteInvoice,
   updateInvoice,
   selectInvoice,
+  setPrintPageSize,
   setLoading,
   setIdle,
   setIsSynced,
@@ -309,7 +317,8 @@ export const downloadInvoice = (id: string, isKwitansi?: boolean): AppThunk => {
         'download-invoice',
         invoiceRef,
         customerState.customers[invoiceRef.customerId],
-        isKwitansi
+        isKwitansi,
+        invoiceState.printPageSize
       );
     }
     return false;
@@ -440,3 +449,5 @@ export const getIsFetched = (state: RootState) => state.invoice.isFetched;
 export const getSelectedId = (state: RootState) =>
   state.invoice.selectedInvoice;
 export const getIsSynced = (state: RootState) => state.invoice.isSynced;
+export const getPrintPageSize = (state: RootState) =>
+  state.invoice.printPageSize;
