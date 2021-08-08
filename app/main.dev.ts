@@ -193,7 +193,12 @@ function savePdf(
   });
 }
 
-const prepareDocument = (invoice: Invoice, customer: Customer) => {
+const prepareDocument = (
+  invoice: Invoice,
+  customer: Customer,
+  pageSize?: string
+) => {
+  ejse.data('pageSize', pageSize || 'A4');
   if (customer.client_address) {
     const addressLine1 = [
       customer.client_address.address,
@@ -271,7 +276,7 @@ ipcMain.on(
     pageSize?: string
   ) => {
     const pdfType = isKwitansi ? 'kwitansi' : 'invoice';
-    prepareDocument(invoice, customer);
+    prepareDocument(invoice, customer, pageSize);
 
     pdfWindow = new BrowserWindow({
       show: false,
