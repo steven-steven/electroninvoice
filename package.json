@@ -280,6 +280,9 @@
   },
   "dependencies": {
     "@develoka/angka-terbilang-js": "^1.2.3",
+    "@firebase/app": "^0.6.10",
+    "@firebase/auth": "^0.14.9",
+    "@firebase/database": "^0.6.11",
     "@fortawesome/fontawesome-free": "^5.14.0",
     "@hot-loader/react-dom": "^16.13.0",
     "@reduxjs/toolkit": "^1.4.0",
@@ -292,7 +295,6 @@
     "electron-log": "^4.2.4",
     "electron-store": "^6.0.1",
     "electron-updater": "^4.3.1",
-    "firebase": "^8.8.1",
     "fs": "^0.0.1-security",
     "history": "^4.7.2",
     "moment": "^2.27.0",
@@ -309,7 +311,7 @@
     "redux-thunk": "^2.3.0",
     "regenerator-runtime": "^0.13.5",
     "source-map-support": "^0.5.19",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.1"
   },
   "devEngines": {
     "node": ">=7.x",
