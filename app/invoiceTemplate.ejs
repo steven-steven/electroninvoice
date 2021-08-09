@@ -32,6 +32,10 @@
         font-family: Arial, 'Helvetica Neue', 'Helvetica', Helvetica, sans-serif;
     }
 
+    .invoice-box .spacedRowItem {
+      height: <%= 20/items.length %>em;
+    }
+
     .invoice-box table {
         width: 100%;
         line-height: inherit;
@@ -166,7 +170,7 @@
             </tr>
 
             <% for(var i=0; i < items.length; i++) { %>
-              <tr class="item">
+              <tr class="item spacedRowItem">
                   <td>
                     <%= i+1 %>
                   </td>
