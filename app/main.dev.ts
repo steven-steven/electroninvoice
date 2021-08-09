@@ -196,9 +196,11 @@ function savePdf(
 const prepareDocument = (
   invoice: Invoice,
   customer: Customer,
-  pageSize?: string
+  pageSize?: string,
+  forViewing = false
 ) => {
   ejse.data('pageSize', pageSize || 'A4');
+  ejse.data('forViewing', forViewing);
   if (customer.client_address) {
     const addressLine1 = [
       customer.client_address.address,
@@ -309,7 +311,7 @@ ipcMain.on(
   'view-invoice',
   (_event, invoice: Invoice, customer: Customer, isKwitansi?: boolean) => {
     const pdfType = isKwitansi ? 'kwitansi' : 'invoice';
-    prepareDocument(invoice, customer);
+    prepareDocument(invoice, customer, undefined, true);
 
     pdfWindow = new BrowserWindow({
       show: true,

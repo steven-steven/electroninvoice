@@ -5,17 +5,20 @@
     <title>A simple, clean, and responsive HTML kwitansi template</title>
 
     <style>
+    .a5Size {
+      font-size: 70%;
+    }
     body {
       padding: 0;
       margin: 0;
     }
     .invoice-box {
-        margin: 50px;
-        position: relative;
-        background-color: white;
-        font-size: 12px;
-        line-height: 24px;
-        font-family: Arial, 'Helvetica Neue', 'Helvetica', Helvetica, sans-serif;
+      margin:1.8em 4.16em 0.83em 4.16em;
+      position: relative;
+      background-color: white;
+      font-size: 0.75em;
+      line-height: 2em;
+      font-family: Arial, 'Helvetica Neue', 'Helvetica', Helvetica, sans-serif;
     }
 
     .invoice-box table {
@@ -31,17 +34,17 @@
     }
 
     .invoice-box .subTitle {
-        font-size: 13px;
+        font-size: 1em;
     }
 
     .invoice-box .title {
-        font-size: 25px;
-        line-height: 20px;
+      font-size: 2em;
+      line-height: 1.66em;
     }
     .invoice-box table.headerInfo {
       width: auto;
       line-height: normal;
-      margin-bottom: 15px;
+      margin-bottom: 0.41em;
     }
 
     .invoice-box table.headerInfo td:first-child {
@@ -53,26 +56,25 @@
       font-weight: lighter;
     }
 
-
     .totalBlock {
+      -webkit-print-color-adjust: exact;
       background-color: antiquewhite;
-      padding: 5px 50px;
+      padding: 0.41em 4.16em;
       border-top: 1px solid black;
       border-bottom: 1px solid black;
     }
     </style>
   </head>
 
-  <body>
+  <body class="<%= (pageSize == 'A5') ? 'a5Size' : (pageSize == 'Letter') ? 'letterSize' : (pageSize == 'Legal') ? 'legalSize' : 'a4' %>">
     <div class="invoice-box">
-
       <div style="text-align:center;">
-        <img src="<%= iconPath %>" style="float:left; max-width:70px; position:absolute; left:2px; top:-15px;">
+        <img src="<%= iconPath %>" style="float:left; max-width:5.7em; position:absolute; left:1em; top:-0.2em;">
         <span class="title">PT DWIPRIMA KARYAGUNA</span><br/>
         <span class="subTitle">JALAN RAYA ANYER NO. 122 CILEGON, Telp. 0254-312114, Fax:0254-310084</span>
       </div>
       <hr/>
-      <div style="margin-top:10px;">
+      <div style="margin-top:0.83em;">
         <table class="headerInfo" cellpadding="0" cellspacing="0">
           <tr>
             <td><u>KWITANSI NO :</u></td>
@@ -83,7 +85,7 @@
         </table>
       </div>
 
-      <div style="padding-left: 6px">
+      <div style="padding-left: 0.5em">
         Sudah Terima Dari:  <%= client %>
         <br/>
         <b> Uang sebanyak Rp. # <span style="font-family: helvetica-light;"><%= terbilang %></span> # </b>
@@ -91,20 +93,19 @@
         Untuk Pembayaran: <%= keteranganKwitansi %>
 
         <div style="display:flex;">
-          <div style="flex-basis:70%; margin-top:50px;">
-            <div style="margin-left:50px;">
+          <div style="flex-basis:40em; margin-top:2.8em;">
+            <div style="margin-left:4.16em;">
               <span class="totalBlock">
                 Rp. <%= total %>
               </span>
             </div>
             <br/>
             <b><u>Catatan</u></b>
-            <span style="display: block; padding-right:100px;"><%= catatanKwitansi %></span>
+            <span style="display: block; padding-right:8.3em;"><%= catatanKwitansi %></span>
           </div>
           <div style="text-align:center;">
             <!-- Tanggal Kwitansi, tempat kwitansi -->
             <p>Cilegon, <%= date %></p>
-            <br/>
             <br/>
             <br/>
             <b><u>( Witarso )</u></b>
