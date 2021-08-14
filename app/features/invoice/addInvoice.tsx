@@ -327,7 +327,7 @@ export default function AddInvoicePage() {
                       name="deskripsi"
                       ref={itemFormRegister}
                       rows={1}
-                      placeholder={
+                      defaultValue={
                         items[selectedTransaction]
                           ? items[selectedTransaction].defaultDesc
                           : ''

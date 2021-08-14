@@ -251,6 +251,21 @@ const prepareDocument = (
       };
     })
   );
+
+  // predict how much description lines will be wrapped in the table. (to calculate table size in the css)
+  const numItemLines = invoice.items.reduce((acc, curr) => {
+    const lines = curr.description.split(/\r\n|\r|\n/);
+    const refactoredLines = [];
+    const maxLineCharCount = 60;
+    for (let i = 0; i < lines.length; i += 1) {
+      for (let j = 0; j < lines[i].length; j += maxLineCharCount) {
+        refactoredLines.push(lines[i].substring(j, j + maxLineCharCount));
+      }
+    }
+    return acc + refactoredLines.length;
+  }, 0);
+  ejse.data('numItemLines', numItemLines);
+
   ejse.data('date', invoice.date);
   ejse.data('taxPercent', invoice.tax);
   ejse.data(
