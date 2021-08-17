@@ -14,14 +14,14 @@
       background-color: white;
     }
     .pageFooter {
-      position:absolute;
+      /* position:absolute;
       bottom:0;
       width:100%;
-      height: 26em;   /* Height of the footer */
-      background-color: white;
+      height: 27em;
+      background-color: white; */
     }
     #kwitansi .invoice-box{
-      margin-top: 1.5em;
+      margin-top: 1em;
     }
     .invoice-box {
         margin:1.8em 4.16em 0.83em 4.16em;
@@ -90,7 +90,7 @@
 
 
 
-    table.mainTable td:nth-child(n+4), table.mainTable td:last-child {
+    table.mainTable td:nth-child(n+3), table.mainTable td:last-child {
         text-align: right;
     }
 
@@ -221,7 +221,7 @@
 
             <tr class="item last">
                 <td colspan="3" rowspan="2">
-                  Terbilang: # <span style="font-family: helvetica-light;"><%= terbilang %></span> #
+                  Terbilang: # <span style="font-family: helvetica-light;"><%= terbilang %> RUPIAH</span> #
                 </td>
                 <td style="padding-left:1.25em;">PPN <%= taxPercent %>%</td>
                 <td>
@@ -279,7 +279,7 @@
             </tr>
             <tr>
               <td>Uang sebanyak</td>
-              <td><b>Rp. # <span style="font-family: helvetica-light;"><%= terbilang %></span> # </b></td>
+              <td><b># <span style="font-family: helvetica-light;"><%= terbilang %> RUPIAH</span> # </b></td>
             </tr>
             <tr>
               <td>Untuk Pembayaran:</td>
@@ -289,19 +289,17 @@
 
           <div style="display:flex;">
             <div style="flex-basis:40em; margin-top:2em;">
-              <div style="margin-left:4.16em;">
+              <div style="margin-left:4.16em; margin-bottom: 1em;">
                 <span class="totalBlock">
                   Rp. <%= total %>
                 </span>
               </div>
-              <br/>
               <b><u>Catatan</u></b>
               <span style="display: block; padding-right:8.3em;"><%= catatanKwitansi %></span>
             </div>
             <div style="text-align:center;">
               <!-- Tanggal Kwitansi, tempat kwitansi -->
               <p>Cilegon, <%= date %></p>
-              <br/>
               <br/>
               <b><u>( Witarso )</u></b>
               <span style="display: block;">Direktur</span>

@@ -63,6 +63,16 @@
       border-top: 1px solid black;
       border-bottom: 1px solid black;
     }
+
+    .invoice-box table.paymentInfo {
+      text-align: left;
+    }
+    .invoice-box table.paymentInfo td {
+      padding: 0.1em 0;
+    }
+    .invoice-box table.paymentInfo td:first-child {
+      width: 10em;
+    }
     </style>
   </head>
 
@@ -86,14 +96,23 @@
       </div>
 
       <div style="padding-left: 0.5em">
-        Sudah Terima Dari:  <%= client %>
-        <br/>
-        <b> Uang sebanyak Rp. # <span style="font-family: helvetica-light;"><%= terbilang %></span> # </b>
-        <br/>
-        Untuk Pembayaran: <%= keteranganKwitansi %>
+        <table class="paymentInfo" cellpadding="0" cellspacing="0">
+          <tr>
+            <td>Sudah Terima Dari:</td>
+            <td><%= client %></td>
+          </tr>
+          <tr>
+            <td>Uang sebanyak</td>
+            <td><b># <span style="font-family: helvetica-light;"><%= terbilang %> RUPIAH</span> # </b></td>
+          </tr>
+          <tr>
+            <td>Untuk Pembayaran:</td>
+            <td><%= keteranganKwitansi %></td>
+          </tr>
+        </table>
 
         <div style="display:flex;">
-          <div style="flex-basis:40em; margin-top:2.8em;">
+          <div style="flex-basis:40em; margin-top:2em;">
             <div style="margin-left:4.16em;">
               <span class="totalBlock">
                 Rp. <%= total %>

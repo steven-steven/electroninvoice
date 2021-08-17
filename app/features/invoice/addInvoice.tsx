@@ -164,7 +164,7 @@ export default function AddInvoicePage() {
       ...rowData,
       {
         transaksi: chosenItem.name,
-        deskripsi: data.deskripsi || chosenItem.defaultDesc,
+        deskripsi: data.deskripsi,
         jumlah: isUnitMetric
           ? `${data.metric.replace('.', '')}.${data.metric_decimal}`
           : data.jumlah,
