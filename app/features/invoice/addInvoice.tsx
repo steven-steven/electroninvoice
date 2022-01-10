@@ -34,13 +34,15 @@ interface LeftItemForm {
   deskripsi: string;
   metric: string;
   metric_decimal: string;
+  unit: string;
   jumlah: string;
   harga: string;
 }
 interface TableData {
   transaksi: string;
   deskripsi: string;
-  isMetric: string;
+  isMetric: boolean;
+  unit: string;
   jumlah: string;
   harga: string;
 }
@@ -66,6 +68,23 @@ export default function AddInvoicePage() {
   const customers = useSelector(getCustomer);
   const dispatch: AppDispatch = useDispatch();
   const history = useHistory();
+
+  // form data
+  const {
+    register: itemFormRegister,
+    handleSubmit: itemFormHandleSubmit,
+    errors: itemFormError,
+    reset: itemReset,
+    setValue: setItemValue,
+  } = useForm();
+  const {
+    register: invoiceFormRegister,
+    handleSubmit: invoiceFormHandleSubmit,
+    errors: invoiceFormError,
+    watch: invoiceWatch,
+    control: invoiceFormControl,
+  } = useForm();
+  const watchedDate = invoiceWatch('date');
 
   const itemList = React.useMemo(
     () =>
@@ -104,14 +123,14 @@ export default function AddInvoicePage() {
   // table data
   const initialItems: TableData[] = invoiceToEdit
     ? invoiceToEdit.items.map((item) => {
-        const isUnitMetric = item.metricQuantity && item.metricQuantity > 0;
         return {
           transaksi: item.name,
           deskripsi: item.description,
-          jumlah: isUnitMetric
-            ? (item.metricQuantity / 1000.0).toString()
+          jumlah: item.isMetric
+            ? (item.quantity / 1000.0).toString()
             : item.quantity.toString(),
-          isMetric: isUnitMetric ? '1' : '0',
+          isMetric: item.isMetric,
+          unit: item.unit,
           harga: item.rate.toString(),
         };
       })
@@ -125,28 +144,13 @@ export default function AddInvoicePage() {
   const [skipPageReset, setSkipPageReset] = useState(false);
   const [invoiceNo, setInvoiceNo] = useState<string>('');
 
-  // form data
-  const {
-    register: itemFormRegister,
-    handleSubmit: itemFormHandleSubmit,
-    errors: itemFormError,
-    reset: itemReset,
-  } = useForm();
-  const {
-    register: invoiceFormRegister,
-    handleSubmit: invoiceFormHandleSubmit,
-    errors: invoiceFormError,
-    watch: invoiceWatch,
-    control: invoiceFormControl,
-  } = useForm();
-  const watchedDate = invoiceWatch('date');
-
   useEffect(() => {
     if (invoiceToEdit) {
       setInvoiceNo(invoiceToEdit.invoice_no);
       setSelectedClient(invoiceToEdit.customerId);
       return;
     }
+    setRowData([]);
     // Using an IIFE. change invoice id based on date
     (async function anyNameFunction() {
       const newInvoiceNumber: number = await dispatch(
@@ -168,7 +172,8 @@ export default function AddInvoicePage() {
         jumlah: isUnitMetric
           ? `${data.metric.replace('.', '')}.${data.metric_decimal}`
           : data.jumlah,
-        isMetric: isUnitMetric ? '1' : '0',
+        isMetric: isUnitMetric || false,
+        unit: data.unit,
         harga: chosenItem.rate.toString(),
       },
     ]);
@@ -183,16 +188,16 @@ export default function AddInvoicePage() {
       customerId: selectedClient,
       date: Moment(data.date).format('DD/MM/YYYY'),
       items: rowData.map((item) => {
-        const isMetric = item.isMetric === '1';
-        const quantity = isMetric
+        const quantity = item.isMetric
           ? parseFloat(item.jumlah.trim().replace(',', '.'))
           : parseInt(item.jumlah, 10);
         return {
           name: item.transaksi,
           description: item.deskripsi,
           rate: parseInt(item.harga, 10),
-          metricQuantity: isMetric ? Math.round(quantity * 1000) : 0,
-          quantity: isMetric ? 0 : quantity,
+          unit: item.unit,
+          quantity: item.isMetric ? Math.round(quantity * 1000) : quantity,
+          isMetric: item.isMetric,
           amount: Math.round(parseInt(item.harga, 10) * quantity),
         };
       }),
@@ -258,14 +263,19 @@ export default function AddInvoicePage() {
           {
             Header: 'Jumlah',
             accessor: 'jumlah',
+            width: 90,
           },
           {
             Header: 'Harga / unit',
             accessor: 'harga',
           },
           {
-            Header: 'Unit',
+            Header: 'isMetric',
             accessor: 'isMetric',
+          },
+          {
+            Header: 'Unit',
+            accessor: 'unit',
           },
         ],
       },
@@ -346,7 +356,13 @@ export default function AddInvoicePage() {
                       id="selectUnit"
                       name="selectUnit"
                       onChange={(e) => {
-                        setIsUnitMetric(e.target.value === '1');
+                        if (e.target.value === '1') {
+                          setIsUnitMetric(true);
+                          setItemValue('unit', 'm^2');
+                        } else {
+                          setIsUnitMetric(false);
+                          setItemValue('unit', 'unit');
+                        }
                       }}
                       ref={itemFormRegister({ required: true })}
                       defaultValue=""
@@ -355,12 +371,26 @@ export default function AddInvoicePage() {
                         -- select Unit --
                       </option>
                       <option value="1">metric</option>
-                      <option value="0">jumlah unit</option>
+                      <option value="0">jumlah satuan</option>
                     </select>
+                  </label>
+                  <label htmlFor="unit">
+                    Unit Satuan
+                    <div className="relative mt-1 rounded-md shadow-sm">
+                      <input
+                        id="unit"
+                        name="unit"
+                        type="text"
+                        ref={itemFormRegister}
+                        className={`w-full mb-8 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
+                          invoiceFormError.invoiceNo ? 'border-red-500' : ''
+                        }`}
+                      />
+                    </div>
                   </label>
                   {isUnitMetric === false && (
                     <label htmlFor="jumlah">
-                      Jumlah (unit)*
+                      Jumlah Satuan *
                       <div className="relative mt-1 rounded-md shadow-sm">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                           <span className="text-gray-600">#</span>

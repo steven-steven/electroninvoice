@@ -25,7 +25,11 @@ const EditableCell = ({
       | React.ChangeEvent<HTMLTextAreaElement>
       | React.ChangeEvent<HTMLSelectElement>
   ) => {
-    setValue(e.target.value);
+    const newInputValue =
+      e.target.type === 'checkbox'
+        ? (e.target as HTMLInputElement).checked
+        : e.target.value;
+    setValue(newInputValue);
   };
   // only update data when input is blurred
   const onBlur = () => {
@@ -38,7 +42,7 @@ const EditableCell = ({
   if (id === 'deskripsi') {
     return (
       <textarea
-        className="w-full break-words p-2 focus:outline-none focus:shadow-outline border border-gray-300 rounded-md appearance-none leading-normal"
+        className="w-full p-2 leading-normal break-words border border-gray-300 rounded-md appearance-none focus:outline-none focus:shadow-outline"
         style={{ marginTop: '0.4rem' }}
         rows={1}
         value={value}
@@ -49,16 +53,12 @@ const EditableCell = ({
   }
   if (id === 'isMetric') {
     return (
-      <select
-        className="w-full h-10 p-2 focus:outline-none focus:shadow-outline border border-gray-300 rounded leading-tight"
-        required
-        value={value}
+      <input
+        type="checkbox"
+        checked={value}
         onChange={onChange}
         onBlur={onBlur}
-      >
-        <option value="1">metric</option>
-        <option value="0">satuan</option>
-      </select>
+      />
     );
   }
   if (id === 'jumlah' || id === 'harga') {
@@ -71,14 +71,14 @@ const EditableCell = ({
         value={value}
         onChange={onChange}
         onBlur={onBlur}
-        className="w-full break-words p-2 focus:outline-none focus:shadow-outline border border-gray-300 rounded-md appearance-none leading-normal"
+        className="w-full p-2 leading-normal break-words border border-gray-300 rounded-md appearance-none focus:outline-none focus:shadow-outline"
       />
     );
   }
 
   return (
     <input
-      className="w-full break-words p-2 focus:outline-none focus:shadow-outline border border-gray-300 rounded-md appearance-none leading-normal"
+      className="w-full p-2 leading-normal break-words border border-gray-300 rounded-md appearance-none focus:outline-none focus:shadow-outline"
       value={value}
       onChange={onChange}
       onBlur={onBlur}
@@ -124,7 +124,7 @@ export default function MyTable({
 
   return (
     <div>
-      <table {...getTableProps()} className="table-fixed w-full">
+      <table {...getTableProps()} className="w-full table-fixed">
         <thead>
           {headerGroups.map((headerGroup) => (
             <tr {...headerGroup.getHeaderGroupProps()}>

@@ -158,6 +158,10 @@ function formatPrice(price: number) {
   )},${splitted[1].padEnd(3, '0')}`;
 }
 
+function sanitizeUnit(unit: string) {
+  return `${unit.replace('^', '<sup>')}<sup/>`;
+}
+
 function savePdf(
   win: BrowserWindow,
   pdfData: Buffer,
@@ -239,15 +243,14 @@ const prepareDocument = (
   ejse.data(
     'items',
     invoice.items.map((item) => {
-      const isUnitMetric = item.metricQuantity && item.metricQuantity > 0;
       return {
         ...item,
         amount: formatPrice(item.amount),
         rate: formatPrice(item.rate),
-        quantity: isUnitMetric
-          ? formatPrice(item.metricQuantity / 1000.0)
+        quantity: item.isMetric
+          ? formatPrice(item.quantity / 1000.0)
           : item.quantity,
-        isMetric: isUnitMetric,
+        unit: sanitizeUnit(item.unit),
       };
     })
   );
@@ -393,7 +396,7 @@ ipcMain.on(
         : '';
       const tax = Math.round((invoice.tax / 100) * invoice.subtotal);
       const items = invoice.items.reduce((accStr, item) => {
-        return `${accStr}${item.name}-${item.rate}-${item.description}-${item.metricQuantity}-${item.quantity}-${item.amount},`;
+        return `${accStr}${item.name}-${item.rate}-${item.description}-${item.unit}-${item.quantity}-${item.amount},`;
       }, '');
       acc.push({ ...invoice, client_address: clientAddress, tax, items });
       return acc;

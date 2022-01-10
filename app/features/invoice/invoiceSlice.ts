@@ -31,7 +31,8 @@ export interface Item {
   name: string;
   rate: number;
   description: string;
-  metricQuantity: number;
+  isMetric: boolean;
+  unit: string;
   quantity: number;
   amount: number;
 }
