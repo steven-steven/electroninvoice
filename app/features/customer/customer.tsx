@@ -40,6 +40,20 @@ interface TableCells {
   addr_postal: string;
 }
 
+type CustomerInvoiceTable = {
+  id: string;
+  invoiceNo: string;
+  dateCol: string;
+  totalColStr: string;
+  totalCol: number;
+  paidColStr: string;
+  paid: boolean;
+};
+
+interface CustomerInvoiceData {
+  [key: string]: CustomerInvoiceTable[];
+}
+
 export default function CustomerPage() {
   const status = useSelector(getStatus);
   const customers = useSelector(getCustomer);
@@ -95,15 +109,44 @@ export default function CustomerPage() {
     customerReset();
   };
 
-  const data = React.useMemo(
+  const customerToInvoiceData: CustomerInvoiceData = React.useMemo(() => {
+    return (Object.values(invoices) as Invoice[]).reduce(
+      (res: CustomerInvoiceData, invoice: Invoice) => {
+        const newInvoiceRow: CustomerInvoiceTable = {
+          id: invoice.id,
+          invoiceNo: invoice.invoice_no,
+          dateCol: invoice.date,
+          totalColStr: invoice.total.toLocaleString('id'),
+          totalCol: invoice.total,
+          paidColStr: invoice.paid ? '✅' : '❌',
+          paid: invoice.paid,
+        };
+        if (res[invoice.customerId]) {
+          res[invoice.customerId].push(newInvoiceRow);
+        } else {
+          res[invoice.customerId] = [newInvoiceRow];
+        }
+        return res;
+      },
+      {}
+    );
+  }, [invoices]);
+
+  const customerData = React.useMemo(
     () =>
       Object.values(customers).map((customer) => {
         return {
           nameCol: customer.client,
           customerId: customer.id,
+          unpaidAmountCol: customerToInvoiceData[customer.id]
+            ? customerToInvoiceData[customer.id].reduce((acc, invoice) => {
+                if (invoice.paid) return acc;
+                return acc + invoice.totalCol;
+              }, 0)
+            : 0,
         };
       }),
-    [customers]
+    [customers, customerToInvoiceData]
   );
 
   // will update the internal table state
@@ -153,26 +196,15 @@ export default function CustomerPage() {
           );
         },
       },
+      {
+        Header: 'Jumlah belum terbayarkan',
+        accessor: 'unpaidAmountCol',
+      },
     ],
     [dispatch]
   );
 
   // ------ customer specific invoice table
-  const customerData = React.useMemo(
-    () =>
-      Object.values(invoices)
-        .filter((invoice) => invoice.customerId === customerToEdit?.id)
-        .map((invoice) => {
-          return {
-            id: invoice.id,
-            invoiceNo: invoice.invoice_no,
-            dateCol: invoice.date,
-            totalCol: invoice.total.toLocaleString('id'),
-          };
-        }),
-    [customerToEdit, invoices]
-  );
-
   const customerColumn = React.useMemo(
     () => [
       {
@@ -187,7 +219,7 @@ export default function CustomerPage() {
       },
       {
         Header: 'Total',
-        accessor: 'totalCol',
+        accessor: 'totalColStr',
         disableSortBy: true,
       },
       {
@@ -274,6 +306,10 @@ export default function CustomerPage() {
           );
         },
       },
+      {
+        Header: 'Lunas',
+        accessor: 'paidColStr',
+      },
     ],
     [dispatch]
   );
@@ -330,7 +366,7 @@ export default function CustomerPage() {
               </span>
               <MyTable
                 columns={columns}
-                data={data}
+                data={customerData}
                 useControlledState={useControlledState}
               />
             </div>
@@ -542,7 +578,10 @@ export default function CustomerPage() {
             <span className="mb-3 ml-5 text-2xl font-light text-left font-display">
               {`Daftar invoice milik '${customerToEdit.client}'`}
             </span>
-            <MyTable columns={customerColumn} data={customerData} />
+            <MyTable
+              columns={customerColumn}
+              data={customerToInvoiceData[customerToEdit.id] || []}
+            />
           </div>
         </div>
       )}

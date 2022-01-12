@@ -62,6 +62,7 @@ export default function InvoicePage() {
           clientCol: customers[invoice.customerId]?.client,
           dateCol: invoice.date,
           totalCol: invoice.total.toLocaleString('id'),
+          paid: invoice.paid ? '✅' : '❌',
         };
       }),
     [customers, invoices]
@@ -154,6 +155,10 @@ export default function InvoicePage() {
             </button>
           );
         },
+      },
+      {
+        Header: 'Lunas',
+        accessor: 'paid',
       },
     ],
     [dispatch]

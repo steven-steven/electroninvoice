@@ -377,6 +377,7 @@ ipcMain.on(
       { id: 'date', title: 'Date' },
       { id: 'items', title: 'Items' },
       { id: 'tax', title: 'Tax' },
+      { id: 'paid', title: 'Paid' },
       { id: 'total', title: 'Total' },
       { id: 'subtotal', title: 'Subtotal' },
       { id: 'createdAt', title: 'CreatedAt' },

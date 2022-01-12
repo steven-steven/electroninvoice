@@ -51,6 +51,7 @@ const schema = {
         },
       },
       tax: { type: 'number' },
+      paid: { type: 'booolean' },
       // external/temp data
       id: { type: 'string' },
       createdAt: { type: 'string' },

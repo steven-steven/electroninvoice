@@ -19,6 +19,7 @@ export interface InvoiceRequest {
   date: string;
   items: Item[];
   tax: number;
+  paid: boolean;
 }
 export interface Invoice extends InvoiceRequest {
   id: string;

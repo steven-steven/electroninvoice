@@ -53,6 +53,7 @@ interface RightInvoiceForm {
   catatankwitansi: string;
   catataninvoice: string;
   keteranganKwitansi: string;
+  paid: boolean;
   // address
   addr_jln: string;
   addr_kota: string;
@@ -205,6 +206,7 @@ export default function AddInvoicePage() {
       catatanKwitansi: data.catatankwitansi,
       keteranganKwitansi: data.keteranganKwitansi,
       tax: parseInt(data.tax, 10),
+      paid: data.paid,
     };
 
     if (invoiceToEdit != null) {
@@ -585,10 +587,24 @@ export default function AddInvoicePage() {
                           ? ''
                           : invoiceToEdit.keteranganKwitansi
                       }
-                      className={`w-full mb-3 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
+                      className={`w-full mb-8 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
                         itemFormError.keteranganKwitansi ? 'border-red-500' : ''
                       }`}
                     />
+                  </label>
+                  <label
+                    htmlFor="paid"
+                    className="inline-flex items-center px-3 mb-3 bg-teal-200"
+                  >
+                    <input
+                      id="paid"
+                      name="paid"
+                      type="checkbox"
+                      ref={invoiceFormRegister}
+                      className="w-10 h-10"
+                      defaultChecked={invoiceToEdit?.paid || false}
+                    />
+                    <span>Lunas</span>
                   </label>
                   {
                     // ADDRESS FORM
