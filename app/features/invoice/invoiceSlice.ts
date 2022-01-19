@@ -32,7 +32,7 @@ export interface Item {
   name: string;
   rate: number;
   description: string;
-  isMetric: boolean;
+  isHideAmount: boolean;
   unit: string;
   quantity: number;
   amount: number;

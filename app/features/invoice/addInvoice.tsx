@@ -36,12 +36,13 @@ interface LeftItemForm {
   metric_decimal: string;
   unit: string;
   jumlah: string;
+  isHideAmount: boolean;
   harga: string;
 }
 interface TableData {
   transaksi: string;
   deskripsi: string;
-  isMetric: boolean;
+  isHideAmount: boolean;
   unit: string;
   jumlah: string;
   harga: string;
@@ -127,10 +128,8 @@ export default function AddInvoicePage() {
         return {
           transaksi: item.name,
           deskripsi: item.description,
-          jumlah: item.isMetric
-            ? (item.quantity / 1000.0).toString()
-            : item.quantity.toString(),
-          isMetric: item.isMetric,
+          jumlah: (item.quantity / 1000.0).toString(),
+          isHideAmount: item.isHideAmount,
           unit: item.unit,
           harga: item.rate.toString(),
         };
@@ -173,7 +172,7 @@ export default function AddInvoicePage() {
         jumlah: isUnitMetric
           ? `${data.metric.replace('.', '')}.${data.metric_decimal}`
           : data.jumlah,
-        isMetric: isUnitMetric || false,
+        isHideAmount: data.isHideAmount,
         unit: data.unit,
         harga: chosenItem.rate.toString(),
       },
@@ -189,16 +188,14 @@ export default function AddInvoicePage() {
       customerId: selectedClient,
       date: Moment(data.date).format('DD/MM/YYYY'),
       items: rowData.map((item) => {
-        const quantity = item.isMetric
-          ? parseFloat(item.jumlah.trim().replace(',', '.'))
-          : parseInt(item.jumlah, 10);
+        const quantity = parseFloat(item.jumlah.trim().replace(',', '.'));
         return {
           name: item.transaksi,
           description: item.deskripsi,
           rate: parseInt(item.harga, 10),
           unit: item.unit,
-          quantity: item.isMetric ? Math.round(quantity * 1000) : quantity,
-          isMetric: item.isMetric,
+          quantity: Math.round(quantity * 1000),
+          isHideAmount: item.isHideAmount,
           amount: Math.round(parseInt(item.harga, 10) * quantity),
         };
       }),
@@ -272,8 +269,8 @@ export default function AddInvoicePage() {
             accessor: 'harga',
           },
           {
-            Header: 'Decimal?',
-            accessor: 'isMetric',
+            Header: 'Jangan Tampilkan Jumlah',
+            accessor: 'isHideAmount',
           },
           {
             Header: 'Unit',
@@ -399,9 +396,18 @@ export default function AddInvoicePage() {
                   {isUnitMetric === false && (
                     <label htmlFor="jumlah">
                       Jumlah Satuan *
-                      <p className="text-sm">
-                        Isi 0 jika item tidak memiliki jumlah
-                      </p>
+                      <div>
+                        <span className="pr-3 text-sm">
+                          Jangan menampilkan jumlah
+                        </span>
+                        <input
+                          id="isHideAmount"
+                          name="isHideAmount"
+                          type="checkbox"
+                          ref={itemFormRegister}
+                          defaultChecked={false}
+                        />
+                      </div>
                       <div className="relative mt-1 rounded-md shadow-sm">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                           <span className="text-gray-600">#</span>
@@ -409,7 +415,7 @@ export default function AddInvoicePage() {
                         <input
                           id="jumlah"
                           name="jumlah"
-                          min="0"
+                          min="1"
                           ref={itemFormRegister({ required: true })}
                           type="number"
                           className={`w-full pl-8 mb-3 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
@@ -690,9 +696,9 @@ export default function AddInvoicePage() {
                 <span className="pl-3 font-hairline text-gray-700">
                   {`Rp. ${calculateTotal(
                     rowData.reduce((a, s) => {
-                      const quantity = s.isMetric
-                        ? parseFloat(s.jumlah.trim().replace(',', '.'))
-                        : parseInt(s.jumlah, 10);
+                      const quantity = parseFloat(
+                        s.jumlah.trim().replace(',', '.')
+                      );
                       // eslint-disable-next-line no-param-reassign
                       a += parseInt(s.harga, 10) * quantity;
                       return a;

@@ -51,7 +51,7 @@ const EditableCell = ({
       />
     );
   }
-  if (id === 'isMetric') {
+  if (id === 'isHideAmount') {
     return (
       <input
         type="checkbox"

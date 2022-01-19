@@ -162,13 +162,6 @@ function sanitizeUnit(unit: string) {
   return `${unit.replace('^', '<sup>')}<sup/>`;
 }
 
-function displayQuantity(quantity: string | number) {
-  if (quantity === 0) {
-    return '';
-  }
-  return quantity;
-}
-
 function savePdf(
   win: BrowserWindow,
   pdfData: Buffer,
@@ -254,9 +247,7 @@ const prepareDocument = (
         ...item,
         amount: formatPrice(item.amount),
         rate: formatPrice(item.rate),
-        quantity: item.isMetric
-          ? displayQuantity(formatPrice(item.quantity / 1000.0))
-          : displayQuantity(item.quantity),
+        quantity: item.isHideAmount ? '' : formatPrice(item.quantity / 1000.0),
         unit: sanitizeUnit(item.unit),
       };
     })

@@ -44,7 +44,7 @@ const schema = {
             rate: { type: 'number' },
             description: { type: 'string' },
             unit: { type: 'string' },
-            isMetric: { type: 'boolean' },
+            isHideAmount: { type: 'boolean' },
             quantity: { type: 'number' },
             amount: { type: 'number' },
           },
