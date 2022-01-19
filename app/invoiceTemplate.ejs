@@ -57,10 +57,18 @@
 
     .invoice-box .subTitle {
         font-size: 1em;
+        font-weight: 600;
+    }
+
+    .invoice-box hr {
+      height: 0px;
+      border: none;
+      border-top: 1px solid black;
     }
 
     .invoice-box .title {
         font-size: 2em;
+        font-weight: 600;
     }
     .invoice-box table.headerInfo {
       width: auto;
@@ -247,7 +255,8 @@
             <span style="display: block; padding-right:8.33em;"><%= catatanInvoice %></span>
           </div>
           <div style="text-align:center;">
-            <p style="margin-bottom:1.5em;">Hormat Kami</p>
+            <p>Hormat Kami</p>
+            <br/>
             <br/>
             <b><u>( Witarso )</u></b>
             <span style="display: block;">Direktur</span>
@@ -292,8 +301,8 @@
           </table>
 
           <div style="display:flex;">
-            <div style="flex-basis:40em; margin-top:2em;">
-              <div style="margin-left:4.16em; margin-bottom: 1em;">
+            <div style="flex-basis:40em; margin-top:3em;">
+              <div style="margin-left:4.16em; margin-bottom: 3em;">
                 <span class="totalBlock">
                   Rp. <%= total %>
                 </span>
@@ -304,6 +313,7 @@
             <div style="text-align:center;">
               <!-- Tanggal Kwitansi, tempat kwitansi -->
               <p class="signature">Cilegon, <%= date %></p>
+              <br/>
               <br/>
               <b><u>( Witarso )</u></b>
               <span style="display: block;">Direktur</span>
