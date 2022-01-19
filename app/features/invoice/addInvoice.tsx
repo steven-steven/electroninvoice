@@ -255,7 +255,7 @@ export default function AddInvoicePage() {
         Header: 'Barang/Jasa',
         columns: [
           {
-            Header: 'Transaksi',
+            Header: 'Barang',
             accessor: 'transaksi',
           },
           {
@@ -268,11 +268,11 @@ export default function AddInvoicePage() {
             width: 90,
           },
           {
-            Header: 'Harga / unit',
+            Header: 'Harga per unit',
             accessor: 'harga',
           },
           {
-            Header: 'isMetric',
+            Header: 'Decimal?',
             accessor: 'isMetric',
           },
           {
@@ -350,9 +350,9 @@ export default function AddInvoicePage() {
                     />
                   </label>
                   <label htmlFor="selectUnit">
-                    Pilih Unit
+                    Pilih Format Jumlah *
                     <select
-                      className={`block mb-3 h-12 w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
+                      className={`block mb-8 h-12 w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
                         itemFormError.selectUnit ? 'border-red-500' : ''
                       }`}
                       id="selectUnit"
@@ -370,21 +370,27 @@ export default function AddInvoicePage() {
                       defaultValue=""
                     >
                       <option disabled value="">
-                        -- select Unit --
+                        -- select format jumlah --
                       </option>
-                      <option value="1">metric</option>
-                      <option value="0">jumlah satuan</option>
+                      <option value="0">Jumlah satuan</option>
+                      <option value="1">Decimal</option>
                     </select>
                   </label>
-                  <label htmlFor="unit">
+                  <label
+                    htmlFor="unit"
+                    className={isUnitMetric == null ? 'invisible' : 'visible'}
+                  >
                     Unit Satuan
+                    <p className="text-sm">
+                      Jenis satuan yang tertulis disebelah nomor jumlah.
+                    </p>
                     <div className="relative mt-1 rounded-md shadow-sm">
                       <input
                         id="unit"
                         name="unit"
                         type="text"
                         ref={itemFormRegister}
-                        className={`w-full mb-8 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
+                        className={`w-full mb-3 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
                           invoiceFormError.invoiceNo ? 'border-red-500' : ''
                         }`}
                       />
@@ -393,6 +399,9 @@ export default function AddInvoicePage() {
                   {isUnitMetric === false && (
                     <label htmlFor="jumlah">
                       Jumlah Satuan *
+                      <p className="text-sm">
+                        Isi 0 jika item tidak memiliki jumlah
+                      </p>
                       <div className="relative mt-1 rounded-md shadow-sm">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                           <span className="text-gray-600">#</span>
@@ -400,7 +409,7 @@ export default function AddInvoicePage() {
                         <input
                           id="jumlah"
                           name="jumlah"
-                          min="1"
+                          min="0"
                           ref={itemFormRegister({ required: true })}
                           type="number"
                           className={`w-full pl-8 mb-3 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
@@ -412,7 +421,7 @@ export default function AddInvoicePage() {
                   )}
                   {isUnitMetric && (
                     <label htmlFor="metric">
-                      Metric *
+                      Jumlah dalam decimal *
                       <div className="relative mt-1 rounded-md shadow-sm">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                           <span className="text-gray-600">

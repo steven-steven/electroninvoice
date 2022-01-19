@@ -411,9 +411,6 @@ export default function CustomerPage() {
                 <label htmlFor="phone">
                   No. Telp
                   <div className="relative mt-1 rounded-md shadow-sm">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                      <span className="text-gray-600">Rp. </span>
-                    </div>
                     <input
                       id="phone"
                       name="phone"
@@ -425,7 +422,7 @@ export default function CustomerPage() {
                       }
                       min="0"
                       ref={customerFormRegister()}
-                      className={`w-full pl-12 mb-8 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
+                      className={`w-full mb-8 block bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500 ${
                         customerFormError.phone ? 'border-red-500' : ''
                       }`}
                     />
