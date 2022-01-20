@@ -616,7 +616,7 @@ export default function AddInvoicePage() {
                       name="paid"
                       type="checkbox"
                       ref={invoiceFormRegister}
-                      className="w-10 h-10"
+                      className="w-5 h-5"
                       defaultChecked={invoiceToEdit?.paid || false}
                     />
                     <span>Lunas</span>
