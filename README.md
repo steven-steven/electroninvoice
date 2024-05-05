@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="/readme_assets/dpLogo.jpg" width="50" />
+  <img src="https://github.com/steven-steven/electroninvoice/blob/master/readme_assets/dpLogo.jpg" width="50" />
  </p>
 
 Electron app that powers the DP Invoice APP. See the [Backend](https://github.com/steven-steven/GoInvoice) built in Golang.
@@ -34,16 +34,16 @@ yarn package
 
 Add + Edit Invoice
 
-<img src="/readme_assets/create.gif" width="300" />
+<img src="https://github.com/steven-steven/electroninvoice/blob/master/readme_assets/create.gif" width="300" />
 
 Add new inventory Item
 
-<img src="/readme_assets/newItem.gif" width="300" />
+<img src="https://github.com/steven-steven/electroninvoice/blob/master/readme_assets/newItem.gif" width="300" />
 
 Download and edit existing invoice PDF
 
-<img src="/readme_assets/editPdf.gif" width="300" />
+<img src="https://github.com/steven-steven/electroninvoice/blob/master/readme_assets/editPdf.gif" width="300" />
 
 Error Handling when Offline and works again once the internet is available
 
-<img src="https://github.com/steven-steven/Blog/blob/master/static/blogAssets/creating-an-invoice-app-with-electron-and-go/offlineDemo.gif" width="300" />
+<img src="https://github.com/steven-steven/Blog/blob/main/assets/images/blogAssets/creating-an-invoice-app-with-electron-and-go/offlineDemo.gif" width="300" />
